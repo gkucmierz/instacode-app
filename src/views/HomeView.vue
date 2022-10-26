@@ -5,6 +5,9 @@ const worker = new Worker();
 
 // const lodash = await fetch('https://registry.npmjs.org/lodash');
 
+import Splitter from 'primevue/splitter';
+import SplitterPanel from 'primevue/splitterpanel';
+
 import { defineComponent, shallowRef } from 'vue'
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
@@ -12,7 +15,8 @@ import { oneDark } from '@codemirror/theme-one-dark'
 
 export default defineComponent({
   components: {
-    Codemirror
+    Codemirror,
+    Splitter, SplitterPanel,
   },
   setup() {
     const code = `console.log('Hello, world!')`;
@@ -53,20 +57,33 @@ main {
 }
 </style>
 
+<style>
+.p-splitter-gutter-handle:focus {
+  box-shadow: none !important;
+}
+</style>
+
 <template>
   <main>
-    <codemirror
-      v-model="code"
-      placeholder="Code goes here..."
-      :style="{ height: '100%' }"
-      :autofocus="true"
-      :indent-with-tab="true"
-      :tab-size="2"
-      :extensions="extensions"
-      @ready="handleReady"
-      @change="log('change', $event)"
-      @focus="log('focus', $event)"
-      @blur="log('blur', $event)"
-    />
+    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
+      <SplitterPanel>
+        <codemirror
+          v-model="code"
+          placeholder="Code goes here..."
+          :style="{ height: '100%' }"
+          :autofocus="true"
+          :indent-with-tab="true"
+          :tab-size="2"
+          :extensions="extensions"
+          @ready="handleReady"
+          @change="log('change', $event)"
+          @focus="log('focus', $event)"
+          @blur="log('blur', $event)"
+        />
+      </SplitterPanel>
+      <SplitterPanel>
+        Right Pane
+      </SplitterPanel>
+    </Splitter>
   </main>
 </template>

@@ -1,7 +1,11 @@
 @import 'normalize.css';
+/*@import 'primevue/resources/primevue.min.css';*/
+/*@import 'primevue/resources/themes/saga-blue/theme.css';*/
+@import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
 
 html, body {
-  height:  100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 #app {
