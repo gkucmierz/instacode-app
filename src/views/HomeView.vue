@@ -55,9 +55,21 @@ export default defineComponent({
 main {
   height: 100%;
 }
+
+.left-pane {
+  overflow-x: auto;
+}
+
+.right-pane {
+  overflow-x: auto;
+  overflow-y: auto;
+}
 </style>
 
 <style>
+.p-splitter-gutter {
+  outline-width: 0;
+}
 .p-splitter-gutter-handle:focus {
   box-shadow: none !important;
 }
@@ -66,7 +78,7 @@ main {
 <template>
   <main>
     <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
-      <SplitterPanel>
+      <SplitterPanel class="left-pane">
         <codemirror
           v-model="code"
           placeholder="Code goes here..."
@@ -81,8 +93,8 @@ main {
           @blur="log('blur', $event)"
         />
       </SplitterPanel>
-      <SplitterPanel>
-        Right Pane
+      <SplitterPanel class="right-pane">
+        <pre>Right Pane</pre>
       </SplitterPanel>
     </Splitter>
   </main>
