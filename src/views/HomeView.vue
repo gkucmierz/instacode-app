@@ -7,8 +7,8 @@ const worker = new Worker();
 
 import { defineComponent, shallowRef } from 'vue'
 import { Codemirror } from 'vue-codemirror'
-// import { javascript } from '@codemirror/lang-javascript'
-// import { oneDark } from '@codemirror/theme-one-dark'
+import { javascript } from '@codemirror/lang-javascript'
+import { oneDark } from '@codemirror/theme-one-dark'
 
 export default defineComponent({
   components: {
@@ -16,7 +16,7 @@ export default defineComponent({
   },
   setup() {
     const code = `console.log('Hello, world!')`;
-    const extensions = [];//[javascript(), oneDark]
+    const extensions = [javascript(), oneDark]
 
     // Codemirror EditorView instance ref
     const view = shallowRef()
@@ -47,12 +47,18 @@ export default defineComponent({
 
 </script>
 
+<style scoped>
+main {
+  height: 100%;
+}
+</style>
+
 <template>
   <main>
     <codemirror
       v-model="code"
       placeholder="Code goes here..."
-      :style="{ height: '400px' }"
+      :style="{ height: '100%' }"
       :autofocus="true"
       :indent-with-tab="true"
       :tab-size="2"
