@@ -13,6 +13,7 @@ import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
 
+
 export default defineComponent({
   components: {
     Codemirror,
@@ -63,6 +64,7 @@ main {
 .right-pane {
   overflow-x: auto;
   overflow-y: auto;
+  outline-width: 0;
 }
 </style>
 
