@@ -66,6 +66,7 @@ for (let i = 0; i < 42; ++i) {
       this.worker = new Worker();
 
       this.worker.onmessage = ({ data }) => {
+        if (data === '') return;
         this.result += `${data}\n`;
       };
 
