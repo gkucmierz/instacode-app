@@ -19,8 +19,14 @@ export default defineComponent({
     Codemirror,
     Splitter, SplitterPanel,
   },
-  setup() {
-    const code = `console.log('Hello, world!')`;
+  data() {
+    const code = `
+
+for (let i = 0; i < 42; ++i) {
+  console.log(i);
+}
+
+`;
     const extensions = [javascript(), oneDark]
 
     // Codemirror EditorView instance ref
@@ -41,12 +47,40 @@ export default defineComponent({
       // return ...
     }
 
+    this.run(code);
+
     return {
       code,
       extensions,
       handleReady,
       log: console.log,
+      worker,
+      result: '',
     }
+  },
+  methods: {
+    run(code) {
+      this.terminate();
+      this.result = '';
+
+      this.worker = new Worker();
+
+      this.worker.onmessage = ({ data }) => {
+        this.result += `${data}\n`;
+      };
+
+      this.worker.onerror = error => {
+        this.result += error.message;
+      };
+
+      this.worker.postMessage(code);
+    },
+    terminate() {
+      if (this.worker) {
+        this.worker.terminate();
+        this.worker = null;
+      }
+    },
   }
 })
 
@@ -65,6 +99,18 @@ main {
   overflow-x: auto;
   overflow-y: auto;
   outline-width: 0;
+}
+
+.result {
+  overflow-x: auto;
+  overflow-y: auto;
+  margin: 0;
+  padding: 8px;
+  height: 100%;
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  line-height: normal;
 }
 </style>
 
@@ -90,13 +136,13 @@ main {
           :tab-size="2"
           :extensions="extensions"
           @ready="handleReady"
-          @change="log('change', $event)"
+          @change="run($event)"
           @focus="log('focus', $event)"
           @blur="log('blur', $event)"
         />
       </SplitterPanel>
       <SplitterPanel class="right-pane">
-        <pre>Right Pane</pre>
+        <pre class="result">{{ result }}</pre>
       </SplitterPanel>
     </Splitter>
   </main>
