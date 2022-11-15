@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
+import packageJson from './package.json' assert { type: 'json' };
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,10 +16,11 @@ export default defineConfig({
       },
 
       manifest: {
-        name: 'Instacode',
-        short_name: 'Instacode',
-        description: 'Scratchpad for instant JavaScript code running',
+        name: packageJson.name,
+        short_name: packageJson.name,
+        description: packageJson.description,
         theme_color: '#7ACED7',
+        background_color: '#282C34',
         id: '/',
         icons: [
           {

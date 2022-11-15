@@ -1,5 +1,6 @@
 {
-  "name": "instacode-app",
+  "name": "Instacode",
+  "description": "Scratchpad for instant JavaScript code running",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
