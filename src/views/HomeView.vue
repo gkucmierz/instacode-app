@@ -117,6 +117,9 @@ main {
 </style>
 
 <style>
+.p-splitter {
+  border: none !important;
+}
 .p-splitter-gutter {
   outline-width: 0;
 }
