@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'Instacode',
         short_name: 'Instacode',
         description: 'Scratchpad for instant JavaScript code running',
-        theme_color: '#282C34',
+        theme_color: '#7ACED7',
         id: '/',
         icons: [
           {
