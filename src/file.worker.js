@@ -3,6 +3,8 @@ import { stringify } from 'javascript-stringify';
 import { MAX_DATA_SIZE } from './app.config';
 import { getType } from '@gkucmierz/utils/src/get-type';
 
+import { addDefaultLog } from './utils/utils';
+
 const log = console.log;
 console.log = (...a) => l(a);
 console.error = a => e(a);
@@ -61,7 +63,7 @@ const e = err => {
 
 addEventListener('message', ({ data }) => {
   try {
-    const code = new Function(data);
+    const code = new Function(addDefaultLog(data));
     code();
   } catch (e) {
     console.error(e);
