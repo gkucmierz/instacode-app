@@ -1,7 +1,7 @@
 <script>
 
 import Worker from '../file.worker.js?worker';
-const worker = new Worker();
+// const worker = new Worker();
 
 // const lodash = await fetch('https://registry.npmjs.org/lodash');
 
@@ -47,16 +47,17 @@ for (let i = 0; i < 42; ++i) {
       // return ...
     }
 
-    this.run(code);
-
     return {
       code,
       extensions,
       handleReady,
       log: console.log,
-      worker,
+      worker: null,
       result: '',
     }
+  },
+  mounted() {
+    this.run(this.code);
   },
   methods: {
     run(code) {
