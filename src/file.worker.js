@@ -49,10 +49,11 @@ const throttledPM = (() => {
 })();
 
 const l = args => {
-  const data = args.map(el => stringify(el, (val, ind, str) => {
-    if (getType(val) === 'bigint') return `${val}n`;
-    return val;
-  }, '  ')).join(', ');
+  // const data = args.map(el => stringify(el, (val, ind, str) => {
+  //   if (getType(val) === 'bigint') return `${val}n`;
+  //   return val;
+  // }, '  ')).join(', ');
+  const data = args.map(el => stringify(el, null, '  ')).join(', ');
   throttledPM(data);
 };
 

@@ -22,6 +22,8 @@ export default defineComponent({
     const code = `
 'Hello World!';
 
+new Array(10).fill(0).map((_, i) => '#'.repeat(i+1));
+
 2n ** 42n;
 
 for (let i = 0; i < 42; ++i) {
