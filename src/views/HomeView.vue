@@ -8,11 +8,10 @@ import Worker from '../file.worker.js?worker';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
-import { defineComponent, shallowRef } from 'vue'
+import { defineComponent, shallowRef } from 'vue';
 import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
-
 
 export default defineComponent({
   components: {
@@ -51,7 +50,7 @@ for (let i = 0; i < 42; ++i) {
       code,
       extensions,
       handleReady,
-      log: console.log,
+      log: _ => _, // console.log,
       worker: null,
       result: '',
     }
