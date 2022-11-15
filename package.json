@@ -10,6 +10,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.1.1",
     "@codemirror/theme-one-dark": "^6.1.0",
+    "@gkucmierz/utils": "^1.12.1",
     "codemirror": "^6.0.1",
     "javascript-stringify": "^2.1.0",
     "normalize.css": "^8.0.1",

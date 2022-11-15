@@ -1,6 +1,7 @@
 
 import { stringify } from 'javascript-stringify';
 import { MAX_DATA_SIZE } from './app.config';
+import { getType } from '@gkucmierz/utils/src/get-type';
 
 const log = console.log;
 console.log = (...a) => l(a);
@@ -46,7 +47,10 @@ const throttledPM = (() => {
 })();
 
 const l = args => {
-  const data = args.map(el => stringify(el, null, '  ')).join(', ');
+  const data = args.map(el => stringify(el, (val, ind, str) => {
+    if (getType(val) === 'bigint') return `${val}n`;
+    return val;
+  }, '  ')).join(', ');
   throttledPM(data);
 };
 
