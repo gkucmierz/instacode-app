@@ -9,9 +9,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+
+$padding: 12px;
+
 .help {
-  visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -25,30 +27,53 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.help.visible {
-  visibility: visible;
-}
 
-.window {
-  padding: 12px 24px;
-  border-radius: 24px;
-  height: calc(100% - 100px);
-  width: calc(100% - 100px);
-  line-height: 1.5;
-  font-family: monospace;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(32, 32, 32, 0.6);
-  overflow-y: auto;
-}
+  visibility: hidden;
+  &.visible {
+    visibility: visible;
+  }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
+  .window {
+    padding: $padding $padding * 4;
+    border-radius: $padding * 2;
+    // height: calc(100% - 100px);
+    // width: calc(100% - 100px);
+    line-height: 1.5;
+    font-family: monospace;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(32, 32, 32, 0.6);
+    overflow-y: auto;
 
-b {
-  color: #8f8;
+    ul {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        display: flex;
+        flex: 1 1 0px;
+        flex-wrap: nowrap;
+
+        * {
+          width: 50%;
+        }
+
+        b {
+          padding-right: 4px;
+          white-space: nowrap;
+          text-align: right;
+        }
+        span {
+          padding-left: 4px;
+          white-space: nowrap;
+          text-align: left;
+        }
+      }
+    }
+
+    b {
+      color: #8f8;
+    }
+  }
 }
 </style>
 
@@ -66,19 +91,24 @@ b {
         <!-- ⌘ ⇧ ⌥ ⌃ ⇪ -->
         <ul>
           <li>
-            <b>⌘Command-Comma (,)</b> - open app settings
+            <b>⌘Cmd - ,</b>
+            <span>- open app settings</span>
           </li>
           <li>
-            <b>⌘Command-Shift-?</b> - show this help window
+            <b>⌃Ctrl - ,</b>
+            <span>- open app settings</span>
           </li>
           <li>
-            <b>⌃Control-Comma (,)</b> - open app settings
+            <b>⌘Com + Shift + ?</b>
+            <span>- show this help window</span>
           </li>
           <li>
-            <b>⌃Control-Shift-?</b> - show this help window
+            <b>⌃Ctrl + Shift + ?</b>
+            <span>- show this help window</span>
           </li>
           <li>
-            <b>ESC</b> - close window
+            <b>ESC</b>
+            <span>- close window</span>
           </li>
         </ul>
       </div>
