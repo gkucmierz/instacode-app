@@ -1,5 +1,7 @@
 <script>
 
+import Result from '../components/Result.vue';
+
 import Worker from '../file.worker.js?worker';
 // const worker = new Worker();
 
@@ -17,6 +19,7 @@ export default defineComponent({
   components: {
     Codemirror,
     Splitter, SplitterPanel,
+    Result,
   },
   data() {
     const code = `
@@ -151,7 +154,7 @@ main {
         />
       </SplitterPanel>
       <SplitterPanel class="right-pane">
-        <pre class="result">{{ result }}</pre>
+        <Result :data="result"/>
       </SplitterPanel>
     </Splitter>
   </main>
