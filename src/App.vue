@@ -25,6 +25,7 @@ export default defineComponent({
       }
       if (e.keyCode === 27) {
         this.showHelp = false;
+        e.preventDefault();
       }
     });
     return {

@@ -20,6 +20,7 @@ export default defineComponent({
   z-index: 1;
   padding: 0;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 
   display: flex;
   justify-content: center;
