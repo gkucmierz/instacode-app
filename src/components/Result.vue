@@ -25,6 +25,6 @@ export default defineComponent({
 
 <template>
   <div class="result">
-    <pre>{{ data }}</pre>
+    <pre class="selectable">{{ data }}</pre>
   </div>
 </template>
