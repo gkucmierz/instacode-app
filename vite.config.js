@@ -21,11 +21,14 @@ export default defineConfig({
       },
 
       manifest: {
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
         name: packageJson.name,
         short_name: packageJson.name,
         description: packageJson.description,
-        theme_color: '#7ACED7',
         background_color: '#282C34',
+        theme_color: '#7ACED7',
         id: '/',
         shortcuts : [
           {
@@ -33,7 +36,7 @@ export default defineConfig({
             url: '/',
             description: 'Main view of app',
             icons: [
-              { src: '/img/shortcut-icons/instacode.svg', sizes: '150x150', type: 'image/svg+xml' }
+              { src: '/img/shortcut-icons/instacode.svg', sizes: '150x150', type: 'image/svg+xml' },
             ],
           },
           {
@@ -41,7 +44,7 @@ export default defineConfig({
             url: '/settings',
             description: 'Settings view',
             icons: [
-              { src: '/img/shortcut-icons/settings.svg', sizes: '150x150', type: 'image/svg+xml' }
+              { src: '/img/shortcut-icons/settings.svg', sizes: '150x150', type: 'image/svg+xml' },
             ],
           },
         ],
