@@ -13,3 +13,7 @@ for (let i = 0; i < 42; ++i) {
 }
 
 `;
+
+// storage unique keys:
+export const STORAGE_KEY_CODE = 'code';
+export const STORAGE_KEY_SETTINGS = 'settings';

@@ -2,7 +2,7 @@
 
 import Result from '../components/Result.vue';
 import Code from '../components/Code.vue';
-import { WELCOME_CODE } from '../app.config';
+import { WELCOME_CODE, STORAGE_KEY_CODE } from '../app.config';
 
 import Worker from '../file.worker.js?worker';
 
@@ -12,8 +12,6 @@ import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
 import { defineComponent, shallowRef } from 'vue';
-
-const STORAGE_KEY_CODE = 'code';
 
 export default defineComponent({
   components: {

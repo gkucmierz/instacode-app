@@ -13,6 +13,7 @@
     "@codemirror/theme-one-dark": "^6.1.0",
     "@gkucmierz/utils": "^1.12.1",
     "codemirror": "^6.0.1",
+    "eventemitter3": "^4.0.7",
     "javascript-stringify": "^2.1.0",
     "meriyah": "^4.3.3",
     "normalize.css": "^8.0.1",

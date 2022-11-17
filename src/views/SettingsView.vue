@@ -2,6 +2,13 @@
 import { defineComponent } from 'vue';
 import InputSwitch from 'primevue/inputswitch';
 
+import settingsService from '../services/settingsService';
+
+const DEFAULT_SETTINGS = {
+  autoScroll: false,
+  autoPrint: true,
+};
+
 export default defineComponent({
   components: {
     InputSwitch,
@@ -17,9 +24,17 @@ export default defineComponent({
     };
     return {
       escDown,
-      autoScroll: false,
-      autoPrint: true,
+      so: Object.keys(DEFAULT_SETTINGS).reduce((so, key) => {
+        so[key] = settingsService.getItem(key) ?? DEFAULT_SETTINGS[key];
+        return so;
+      }, {}),
     };
+  },
+  watch: {
+    so: {
+      deep: true,
+      handler: val => settingsService.set(val),
+    },
   },
   mounted() {
     window.addEventListener('keydown', this.escDown);
@@ -44,14 +59,15 @@ label {
     <h3>App Settings</h3>
 
     <p>
-      <InputSwitch v-model="autoScroll" inputId="autoScroll" />
+      <InputSwitch v-model="so.autoScroll" inputId="autoScroll" />
       <label for="autoScroll">Auto scroll result</label>
     </p>
 
     <p>
-      <InputSwitch v-model="autoPrint" inputId="autoPrint" />
+      <InputSwitch v-model="so.autoPrint" inputId="autoPrint" />
       <label for="autoPrint">Auto print expressions</label>
     </p>
 
+    <pre>{{ so }}</pre>
   </div>
 </template>
