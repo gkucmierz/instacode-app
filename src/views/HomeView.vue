@@ -2,6 +2,7 @@
 
 import Result from '../components/Result.vue';
 import Code from '../components/Code.vue';
+import { WELCOME_CODE } from '../app.config';
 
 import Worker from '../file.worker.js?worker';
 
@@ -18,20 +19,8 @@ export default defineComponent({
     Result, Code,
   },
   data() {
-    const code = `
-'Hello World!';
-
-new Array(10).fill(0).map((_, i) => '#'.repeat(i+1));
-
-2n ** 42n;
-
-for (let i = 0; i < 42; ++i) {
-  console.log(i);
-}
-
-`;
     return {
-      code: { value: code },
+      code: { value: WELCOME_CODE },
       worker: null,
       result: '',
     }
