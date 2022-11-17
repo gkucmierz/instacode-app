@@ -1,8 +1,11 @@
 <script>
-import { RouterView } from 'vue-router';
 import { defineComponent } from 'vue';
+import InputSwitch from 'primevue/inputswitch';
 
 export default defineComponent({
+  components: {
+    InputSwitch,
+  },
   data() {
     const escDown = e => {
       if (!e) e = event;
@@ -14,6 +17,8 @@ export default defineComponent({
     };
     return {
       escDown,
+      autoScroll: false,
+      autoPrint: true,
     };
   },
   mounted() {
@@ -25,11 +30,28 @@ export default defineComponent({
 });
 </script>
 
+<style scoped>
+.settings {
+  padding: 12px 24px;
+}
+label {
+  margin-left: 12px;
+}
+</style>
+
 <template>
   <div class="settings">
-    <p>App Settings</p>
+    <h3>App Settings</h3>
+
+    <p>
+      <InputSwitch v-model="autoScroll" inputId="autoScroll" />
+      <label for="autoScroll">Auto scroll result</label>
+    </p>
+
+    <p>
+      <InputSwitch v-model="autoPrint" inputId="autoPrint" />
+      <label for="autoPrint">Auto print expressions</label>
+    </p>
+
   </div>
 </template>
-
-<style scoped>
-</style>

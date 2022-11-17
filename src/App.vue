@@ -15,6 +15,11 @@ export default defineComponent({
 
       const cmdCtrl = e.ctrlKey || e.metaKey;
 
+      // console.log(e.keyCode);
+      if (cmdCtrl && e.keyCode === 83) {
+        console.log('share');
+        e.preventDefault();
+      }
       if (cmdCtrl && e.keyCode === COMMA_CODE) {
         this.$router.push({ name: 'settings' });
         e.preventDefault();
@@ -35,10 +40,10 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 </style>
 
 <template>
-  <Help :visible="showHelp" @close="showHelp = false"/>
+  <Help :visible="showHelp" @close="showHelp = false" />
   <RouterView />
 </template>
