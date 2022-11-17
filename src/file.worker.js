@@ -63,10 +63,12 @@ const e = err => {
 };
 
 addEventListener('message', ({ data }) => {
+  const { code, settings } = data;
   try {
-    const code = new Function(addDefaultLog(data));
-    code();
+    const runner = new Function(settings.autoPrint ? addDefaultLog(code) : code);
+    runner();
   } catch (e) {
     console.error(e);
+    log(e);
   }
 });

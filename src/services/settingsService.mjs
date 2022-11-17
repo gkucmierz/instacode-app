@@ -30,7 +30,7 @@ const settingsService = {
     return data;
   },
   set(value) {
-    data = value;
+    data = { ...data, ...value };
     save();
   },
   // ee,

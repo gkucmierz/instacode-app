@@ -1,11 +1,19 @@
 <script>
 import { defineComponent } from 'vue';
+import settingsService from '../services/settingsService';
 
 export default defineComponent({
   name: 'Result',
   props: [
     'data'
   ],
+  watch: {
+    data(val) {
+      if (!settingsService.getItem('autoScroll')) return;
+      const pre = this.$refs.pre;
+      setTimeout(() => pre.scrollTo(0, pre.scrollHeight), 1);
+    },
+  }
 });
 </script>
 
@@ -24,7 +32,7 @@ export default defineComponent({
 </style>
 
 <template>
-  <div class="result">
+  <div class="result" ref="pre">
     <pre class="selectable">{{ data }}</pre>
   </div>
 </template>

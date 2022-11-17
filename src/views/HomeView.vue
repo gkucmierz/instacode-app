@@ -1,8 +1,9 @@
 <script>
 
+import { WELCOME_CODE, STORAGE_KEY_CODE } from '../app.config';
 import Result from '../components/Result.vue';
 import Code from '../components/Code.vue';
-import { WELCOME_CODE, STORAGE_KEY_CODE } from '../app.config';
+import settingsService from '../services/settingsService';
 
 import Worker from '../file.worker.js?worker';
 
@@ -54,7 +55,10 @@ export default defineComponent({
         this.result += error.message;
       };
 
-      this.worker.postMessage(code);
+      this.worker.postMessage({
+        code,
+        settings: settingsService.get(),
+      });
     },
     terminate() {
       if (this.worker) {
