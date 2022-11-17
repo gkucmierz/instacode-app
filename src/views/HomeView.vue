@@ -13,14 +13,19 @@ import SplitterPanel from 'primevue/splitterpanel';
 
 import { defineComponent, shallowRef } from 'vue';
 
+const STORAGE_KEY_CODE = 'code';
+
 export default defineComponent({
   components: {
     Splitter, SplitterPanel,
     Result, Code,
   },
   data() {
+    const lsCode = localStorage.getItem(STORAGE_KEY_CODE);
+    const code = { value: lsCode ? lsCode : WELCOME_CODE };
+
     return {
-      code: { value: WELCOME_CODE },
+      code,
       worker: null,
       result: '',
     }
@@ -29,6 +34,13 @@ export default defineComponent({
     this.run(this.code.value);
   },
   methods: {
+    save(code) {
+      localStorage.setItem(STORAGE_KEY_CODE, code);
+    },
+    change(code) {
+      this.run(code);
+      setTimeout(() => this.save(code), 1);
+    },
     run(code) {
       this.terminate();
       this.result = '';
@@ -53,8 +65,7 @@ export default defineComponent({
       }
     },
   }
-})
-
+});
 </script>
 
 <style scoped>
@@ -77,7 +88,7 @@ main {
   <main>
     <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
       <SplitterPanel class="left-pane">
-        <Code :code="code" @change="run($event)"/>
+        <Code :code="code" @change="change($event)"/>
       </SplitterPanel>
       <SplitterPanel class="right-pane">
         <Result :data="result"/>
