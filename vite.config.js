@@ -27,6 +27,24 @@ export default defineConfig({
         theme_color: '#7ACED7',
         background_color: '#282C34',
         id: '/',
+        shortcuts : [
+          {
+            name: 'Scratchpad',
+            url: '/',
+            description: 'Main view of app',
+            icons: [
+              { src: '/img/shortcut-icons/instacode.svg', sizes: '150x150', type: 'image/svg+xml' }
+            ],
+          },
+          {
+            name: 'Settings',
+            url: '/settings',
+            description: 'Settings view',
+            icons: [
+              { src: '/img/shortcut-icons/settings.svg', sizes: '150x150', type: 'image/svg+xml' }
+            ],
+          },
+        ],
         icons: [
           {
             'src': './img/icons/android-chrome-192x192.png',
