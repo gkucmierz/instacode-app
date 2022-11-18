@@ -17,7 +17,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .result-code {
   overflow-x: auto;
   overflow-y: auto;
@@ -28,6 +28,10 @@ export default defineComponent({
   font-family: monospace;
   white-space: pre;
   line-height: normal;
+
+  pre {
+    margin-top: 0;
+  }
 }
 </style>
 
