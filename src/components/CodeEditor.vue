@@ -6,10 +6,10 @@ import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
 
 export default defineComponent({
-  name: 'Code',
-  props: [
-    'code',
-  ],
+  name: 'CodeEditor',
+  props: {
+    code: String,
+  },
   components: {
     Codemirror,
   },
@@ -23,16 +23,16 @@ export default defineComponent({
     };
 
     // Status is available at all times via Codemirror EditorView
-    const getCodemirrorStates = () => {
-      const state = view.value.state;
-      const ranges = state.selection.ranges;
-      const selected = ranges.reduce((r, range) => r + range.to - range.from, 0);
-      const cursor = ranges[0].anchor;
-      const length = state.doc.length;
-      const lines = state.doc.lines;
-      // more state info ...
-      // return ...
-    }
+    // const getCodemirrorStates = () => {
+    //   const state = view.value.state;
+    //   const ranges = state.selection.ranges;
+    //   const selected = ranges.reduce((r, range) => r + range.to - range.from, 0);
+    //   const cursor = ranges[0].anchor;
+    //   const length = state.doc.length;
+    //   const lines = state.doc.lines;
+    //   // more state info ...
+    //   // return ...
+    // }
 
     return {
       extensions,
@@ -62,7 +62,7 @@ export default defineComponent({
 <template>
   <div class="code">
     <codemirror
-      v-model="code.value"
+      :modelValue="code"
       placeholder="Code goes here..."
       :style="{ height: '100%' }"
       :autofocus="true"

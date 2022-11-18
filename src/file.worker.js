@@ -1,7 +1,7 @@
 
 import { stringify } from 'javascript-stringify';
 import { MAX_DATA_SIZE } from './app.config';
-import { getType } from '@gkucmierz/utils/src/get-type';
+// import { getType } from '@gkucmierz/utils/src/get-type';
 
 import { addDefaultLog } from './utils/utils';
 
@@ -39,9 +39,9 @@ const throttledPM = (() => {
 
     if (tryAgain) {
       const nextTick = fn => setTimeout(fn, 0);
-      const tryAgainFn = _ => throttledPM([][0], false, false);
+      const tryAgainFn = () => throttledPM([][0], false, false);
       // try push data asap
-      setTimeout(tryAgainFn, 0);
+      nextTick(tryAgainFn);
       // try push possibly cached data for async code
       setTimeout(tryAgainFn, updateDelay);
     }

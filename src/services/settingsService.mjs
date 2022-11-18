@@ -1,5 +1,5 @@
 
-import EventEmitter from 'eventemitter3';
+// import EventEmitter from 'eventemitter3';
 import { STORAGE_KEY_SETTINGS } from '../app.config';
 
 // const ee = new EventEmitter();

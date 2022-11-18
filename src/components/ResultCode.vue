@@ -3,22 +3,22 @@ import { defineComponent } from 'vue';
 import settingsService from '../services/settingsService';
 
 export default defineComponent({
-  name: 'Result',
+  name: 'ResultCode',
   props: [
     'data'
   ],
   watch: {
-    data(val) {
+    data() {
       if (!settingsService.getItem('autoScroll')) return;
-      const pre = this.$refs.pre;
-      setTimeout(() => pre.scrollTo(0, pre.scrollHeight), 1);
+      const div = this.$refs.div;
+      setTimeout(() => div.scrollTo(0, div.scrollHeight), 1);
     },
   }
 });
 </script>
 
 <style scoped>
-.result {
+.result-code {
   overflow-x: auto;
   overflow-y: auto;
   margin: 0;
@@ -32,7 +32,7 @@ export default defineComponent({
 </style>
 
 <template>
-  <div class="result" ref="pre">
+  <div class="result-code" ref="div">
     <pre class="selectable">{{ data }}</pre>
   </div>
 </template>

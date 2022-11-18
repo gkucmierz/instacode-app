@@ -1,8 +1,8 @@
 <script>
 
 import { WELCOME_CODE, STORAGE_KEY_CODE } from '../app.config';
-import Result from '../components/Result.vue';
-import Code from '../components/Code.vue';
+import ResultCode from '../components/ResultCode.vue';
+import CodeEditor from '../components/CodeEditor.vue';
 import settingsService from '../services/settingsService';
 
 import Worker from '../file.worker.js?worker';
@@ -12,16 +12,17 @@ import Worker from '../file.worker.js?worker';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
-import { defineComponent, shallowRef } from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   components: {
     Splitter, SplitterPanel,
-    Result, Code,
+    ResultCode, CodeEditor,
   },
   data() {
     const lsCode = localStorage.getItem(STORAGE_KEY_CODE);
-    const code = { value: lsCode ? lsCode : WELCOME_CODE };
+    // const code = { value: lsCode ? lsCode : WELCOME_CODE };
+    const code = lsCode ? lsCode : WELCOME_CODE;
 
     return {
       code,
@@ -30,7 +31,8 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.run(this.code.value);
+    // this.run(this.code.value);
+    this.run(this.code);
   },
   methods: {
     save(code) {
@@ -90,10 +92,10 @@ main {
   <main>
     <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
       <SplitterPanel class="left-pane">
-        <Code :code="code" @change="change($event)"/>
+        <CodeEditor :code="code" @change="change($event)"/>
       </SplitterPanel>
       <SplitterPanel class="right-pane">
-        <Result :data="result"/>
+        <ResultCode :data="result"/>
       </SplitterPanel>
     </Splitter>
   </main>

@@ -1,11 +1,10 @@
 <script>
-import { RouterLink, RouterView } from 'vue-router';
 import { defineComponent } from 'vue';
-import Help from './components/Help.vue';
+import HelpModal from './components/HelpModal.vue';
 
 export default defineComponent({
   components: {
-    Help,
+    HelpModal,
   },
   data() {
     window.addEventListener('keydown', e => {
@@ -44,6 +43,6 @@ export default defineComponent({
 </style>
 
 <template>
-  <Help :visible="showHelp" @close="showHelp = false" />
+  <HelpModal :visible="showHelp" @close="showHelp = false" />
   <RouterView />
 </template>

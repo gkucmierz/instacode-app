@@ -33,7 +33,9 @@ export default defineComponent({
   watch: {
     so: {
       deep: true,
-      handler: val => settingsService.set(val),
+      handler(val) {
+        settingsService.set(val);
+      },
     },
   },
   mounted() {

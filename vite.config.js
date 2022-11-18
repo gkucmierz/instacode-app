@@ -3,7 +3,9 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
-import packageJson from './package.json' assert { type: 'json' };
+// import packageJSON from './package.json' assert { type: 'json' };
+import { readFileSync } from 'fs';
+const packageJSON = JSON.parse(readFileSync('./package.json'));
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,9 +26,9 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        name: packageJson.name,
-        short_name: packageJson.name,
-        description: packageJson.description,
+        name: packageJSON.name,
+        short_name: packageJSON.name,
+        description: packageJSON.description,
         background_color: '#282C34',
         theme_color: '#7ACED7',
         id: '/',

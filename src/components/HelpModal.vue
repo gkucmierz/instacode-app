@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'Help',
+  name: 'HelpModal',
   props: {
     visible: Boolean,
   },
@@ -13,7 +13,7 @@ export default defineComponent({
 
 $padding: 12px;
 
-.help {
+.help-modal {
   position: absolute;
   top: 0;
   left: 0;
@@ -79,7 +79,7 @@ $padding: 12px;
 
 <template>
   <div
-    class="help"
+    class="help-modal"
     :class="{ visible: this.visible }"
     @click="$emit('close')"
   >
