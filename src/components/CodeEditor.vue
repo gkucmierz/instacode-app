@@ -47,17 +47,6 @@ export default defineComponent({
   height: 100%;
 }
 </style>
-<style>
-.p-splitter {
-  border: none !important;
-}
-.p-splitter-gutter {
-  outline-width: 0;
-}
-.p-splitter-gutter-handle:focus {
-  box-shadow: none !important;
-}
-</style>
 
 <template>
   <div class="code">
