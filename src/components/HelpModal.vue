@@ -99,7 +99,7 @@ $padding: 12px;
             <span>- open app settings</span>
           </li>
           <li>
-            <b>⌘Com + Shift + ?</b>
+            <b>⌘Cmd + Shift + ?</b>
             <span>- show this help window</span>
           </li>
           <li>
