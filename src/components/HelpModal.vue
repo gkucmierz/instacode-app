@@ -85,7 +85,7 @@ $padding: 12px;
   >
     <div class="window" @click.stop>
       <div class="header">
-        <h3>Keyboard Shorcuts</h3>
+        <h3>Keyboard Shortcuts</h3>
       </div>
       <div class="content">
         <!-- ⌘ ⇧ ⌥ ⌃ ⇪ -->
