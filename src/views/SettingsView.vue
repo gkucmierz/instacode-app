@@ -47,12 +47,18 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .settings {
   padding: 12px 24px;
-}
-label {
-  margin-left: 12px;
+
+  .item {
+    display: flex;
+    align-items: center;
+
+    label {
+      margin-left: 12px;
+    }
+  }
 }
 </style>
 
@@ -60,12 +66,12 @@ label {
   <div class="settings">
     <h3>App Settings</h3>
 
-    <p>
+    <p class="item">
       <InputSwitch v-model="so.autoScroll" inputId="autoScroll" />
       <label for="autoScroll">Auto scroll result</label>
     </p>
 
-    <p>
+    <p class="item">
       <InputSwitch v-model="so.autoPrint" inputId="autoPrint" />
       <label for="autoPrint">Auto print expressions</label>
     </p>
