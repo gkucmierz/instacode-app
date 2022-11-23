@@ -1,39 +1,42 @@
 <script>
 import { defineComponent } from 'vue';
 import HelpModal from './components/HelpModal.vue';
+import ShareModal from './components/ShareModal.vue';
 
 export default defineComponent({
   components: {
     HelpModal,
+    ShareModal,
   },
   data() {
     window.addEventListener('keydown', e => {
       if (!e) e = event;
       const COMMA_CODE = 188;
       const QUESTION_MARK_CODE = 191;
+      const S_KEY_CODE = 83;
 
       const cmdCtrl = e.ctrlKey || e.metaKey;
 
       // console.log(e.keyCode);
-      if (cmdCtrl && e.keyCode === 83) {
-        console.log('share');
+      if (cmdCtrl && e.keyCode === S_KEY_CODE) {
+        this.showShare = !this.showShare;
         e.preventDefault();
+        e.stopPropagation();
       }
       if (cmdCtrl && e.keyCode === COMMA_CODE) {
         this.$router.push({ name: 'settings' });
         e.preventDefault();
+        e.stopPropagation();
       }
       if (cmdCtrl && e.shiftKey && e.keyCode === QUESTION_MARK_CODE) {
         this.showHelp = !this.showHelp;
         e.preventDefault();
-      }
-      if (e.keyCode === 27) {
-        this.showHelp = false;
-        e.preventDefault();
+        e.stopPropagation();
       }
     });
     return {
       showHelp: false,
+      showShare: false,
     };
   },
 });
@@ -44,5 +47,6 @@ export default defineComponent({
 
 <template>
   <HelpModal :visible="showHelp" @close="showHelp = false" />
+  <ShareModal :visible="showShare" @close="showShare = false" />
   <RouterView />
 </template>

@@ -6,6 +6,19 @@ export default defineComponent({
   props: {
     visible: Boolean,
   },
+  data() {
+    window.addEventListener('keydown', e => {
+      if (!e) e = event;
+      if (!this.visible) return;
+      const ESC_KEY = 27;
+      if (e.keyCode === ESC_KEY) {
+        this.$emit('close');
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+    return {};
+  },
 });
 </script>
 
