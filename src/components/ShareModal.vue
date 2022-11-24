@@ -6,7 +6,6 @@ import PrimeButton from 'primevue/button';
 
 import copy from 'copy-to-clipboard';
 
-import { APP_URL, SHARE_CODE_ROUTE_NAME } from '../app.config';
 import ModalWindow from './ModalWindow.vue';
 import codeService from '../services/codeService';
 
@@ -27,7 +26,7 @@ export default defineComponent({
   },
   methods: {
     encode(code) {
-      return [APP_URL, SHARE_CODE_ROUTE_NAME, btoa(code)].join('/');
+      return codeService.codeToUrl(code);
     },
     copy() {
       copy(this.encode(this.code));
