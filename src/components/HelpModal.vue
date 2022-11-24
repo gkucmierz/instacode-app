@@ -71,6 +71,14 @@ b {
             <span>- show this help window</span>
           </li>
           <li>
+            <b>⌘Cmd + s</b>
+            <span>- open share code modal</span>
+          </li>
+          <li>
+            <b>⌃Ctrl + s</b>
+            <span>- open share code modal</span>
+          </li>
+          <li>
             <b>ESC</b>
             <span>- close window</span>
           </li>
