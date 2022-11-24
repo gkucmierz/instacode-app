@@ -1,4 +1,5 @@
 
+export const APP_URL = 'https://instacode.app';
 export const MAX_DATA_SIZE = 1e5;
 export const ERROR_MAX_DATA_SIZE = 'Error: Output exceeded maximum size allowed';
 export const WELCOME_CODE = `
@@ -17,3 +18,5 @@ for (let i = 0; i < 42; ++i) {
 // storage unique keys:
 export const STORAGE_KEY_CODE = 'code';
 export const STORAGE_KEY_SETTINGS = 'settings';
+
+export const SHARE_CODE_ROUTE_NAME = 'run';

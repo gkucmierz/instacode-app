@@ -1,9 +1,9 @@
 <script>
 
-import { WELCOME_CODE, STORAGE_KEY_CODE } from '../app.config';
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
 import settingsService from '../services/settingsService';
+import codeService from '../services/codeService';
 
 import Worker from '../file.worker.js?worker';
 
@@ -20,28 +20,13 @@ export default defineComponent({
     ResultCode, CodeEditor,
   },
   data() {
-    const lsCode = localStorage.getItem(STORAGE_KEY_CODE);
-    // const code = { value: lsCode ? lsCode : WELCOME_CODE };
-    const code = lsCode ? lsCode : WELCOME_CODE;
-
+    codeService.ee.on('change', code => this.run(code));
     return {
-      code,
       worker: null,
       result: '',
     }
   },
-  mounted() {
-    // this.run(this.code.value);
-    this.run(this.code);
-  },
   methods: {
-    save(code) {
-      localStorage.setItem(STORAGE_KEY_CODE, code);
-    },
-    change(code) {
-      this.run(code);
-      setTimeout(() => this.save(code), 1);
-    },
     run(code) {
       this.terminate();
       this.result = '';
@@ -103,7 +88,7 @@ main {
   <main>
     <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
       <SplitterPanel class="left-pane">
-        <CodeEditor :code="code" @change="change($event)"/>
+        <CodeEditor/>
       </SplitterPanel>
       <SplitterPanel class="right-pane">
         <ResultCode :data="result"/>

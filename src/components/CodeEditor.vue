@@ -5,11 +5,10 @@ import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
 
+import codeService from '../services/codeService';
+
 export default defineComponent({
   name: 'CodeEditor',
-  props: {
-    code: String,
-  },
   components: {
     Codemirror,
   },
@@ -37,8 +36,14 @@ export default defineComponent({
     return {
       extensions,
       handleReady,
+      code: codeService.get(),
     }
   },
+  methods: {
+    change(code) {
+      codeService.change(code);
+    },
+  }
 });
 </script>
 
@@ -59,7 +64,7 @@ export default defineComponent({
       :tab-size="2"
       :extensions="extensions"
       @ready="handleReady"
-      @change="$emit('change', $event)"
+      @change="change($event)"
     />
   </div>
 </template>
