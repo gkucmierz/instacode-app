@@ -4,7 +4,7 @@ import {
   STORAGE_KEY_CODE,
 } from '../app.config';
 import EventEmitter from 'eventemitter3';
-import { toBase64, fromBase64 } from '@gkucmierz/utils/src/base64';
+import { toBase64Url, fromBase64Url } from '@gkucmierz/utils/src/base64.mjs';
 import { APP_URL, SHARE_CODE_ROUTE_NAME } from '../app.config';
 
 const ee = new EventEmitter();
@@ -25,10 +25,10 @@ const codeService = {
     ee.emit('change', code);
   },
   setFromUrl(_encoded) {
-    this.change(fromBase64(_encoded));
+    this.change(fromBase64Url(_encoded));
   },
   codeToUrl(_code = code) {
-    return [APP_URL, SHARE_CODE_ROUTE_NAME, toBase64(_code)].join('/');
+    return [APP_URL, SHARE_CODE_ROUTE_NAME, toBase64Url(_code)].join('/');
   },
   ee,
 };
