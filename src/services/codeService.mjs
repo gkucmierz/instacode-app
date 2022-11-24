@@ -10,7 +10,6 @@ let code;
 
 const init = () => {
   const lsCode = localStorage.getItem(STORAGE_KEY_CODE);
-  console.log('code', lsCode);
   code = lsCode ? lsCode : WELCOME_CODE;
 };
 
@@ -20,7 +19,6 @@ const codeService = {
   },
   change(_code) {
     code = _code;
-    console.log('save', _code)
     localStorage.setItem(STORAGE_KEY_CODE, code);
     ee.emit('change', code);
   },

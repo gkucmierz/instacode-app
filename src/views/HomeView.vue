@@ -26,6 +26,9 @@ export default defineComponent({
       result: '',
     }
   },
+  mounted() {
+    this.run(codeService.get());
+  },
   methods: {
     run(code) {
       this.terminate();
