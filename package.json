@@ -2,6 +2,8 @@
   "name": "Instacode",
   "description": "Scratchpad for instant JavaScript code running",
   "version": "0.0.0",
+  "author": "Grzegorz Kućmierz",
+  "homepage": "https://github.com/gkucmierz/instacode-app",
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp dist/index.html dist/404.html",
