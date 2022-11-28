@@ -1,6 +1,6 @@
 
 import { stringify } from 'javascript-stringify';
-import { MAX_DATA_SIZE } from './app.config';
+import { MAX_DATA_SIZE, ERROR_MAX_DATA_SIZE } from './app.config';
 // import { getType } from '@gkucmierz/utils/src/get-type';
 
 import { addDefaultLog } from './utils/utils';
@@ -10,12 +10,22 @@ console.log = (...a) => l(a);
 console.error = a => e(a);
 
 // limit chunk of data sent to browser, to avoid eventloop blocking
-const limitData = data => {
-  if (data.length > MAX_DATA_SIZE) {
-    return data.substr(0, MAX_DATA_SIZE);
-  }
-  return data;
-};
+const limitData = (() => {
+  let sent = 0;
+  return data => {
+    if (sent > MAX_DATA_SIZE) return '';
+    if (sent + data.length > MAX_DATA_SIZE) {
+      sent += data.length;
+      return [
+        data.substr(0, MAX_DATA_SIZE),
+        '',
+        ERROR_MAX_DATA_SIZE,
+      ].join('\n');
+    }
+    sent += data.length;
+    return data;
+  };
+})();
 
 const throttledPM = (() => {
   const pm = postMessage;
@@ -69,6 +79,5 @@ addEventListener('message', ({ data }) => {
     runner();
   } catch (e) {
     console.error(e);
-    log(e);
   }
 });
