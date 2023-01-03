@@ -42,9 +42,12 @@ const throttledPM = (() => {
     }
 
     if (lastUpdate + updateDelay <= now || finish) {
-      pm(limitData(dataCache.join('\n')));
-      lastUpdate = now;
-      dataCache = [];
+      const data = limitData(dataCache.join('\n'));
+      if (data) {
+        pm(data);
+        lastUpdate = now;
+        dataCache = [];
+      }
     }
 
     if (tryAgain) {
