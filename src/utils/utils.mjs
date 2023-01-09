@@ -4,7 +4,6 @@ import { parseScript } from 'meriyah';
 export const addDefaultLog = code => {
   const lines = code.split('\n');
   const tree = parseScript(code, { loc: true });
-
   const insert = ({ line, column }, str, trim = false) => {
     const l = lines[line-1];
     lines[line-1] = [
@@ -16,6 +15,11 @@ export const addDefaultLog = code => {
 
   const exprs = (tree.body
     .filter(node => node.type === 'ExpressionStatement')
+    .filter(node => {
+      if (node.expression.type !== 'Literal') return true;
+      if (node.expression.value !== 'use strict') return true;
+      return false;
+    })
     .filter(node => {
       const expr = node.expression;
       if (expr.type !== 'CallExpression') return true;
