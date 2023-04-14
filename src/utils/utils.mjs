@@ -3,7 +3,10 @@ import { parseScript } from 'meriyah';
 
 export const addDefaultLog = code => {
   const lines = code.split('\n');
-  const tree = parseScript(code, { loc: true });
+  const tree = parseScript(code, {
+    loc: true,
+    next: true,
+  });
   const insert = ({ line, column }, str, trim = false) => {
     const l = lines[line-1];
     lines[line-1] = [
