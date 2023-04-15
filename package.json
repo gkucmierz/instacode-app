@@ -1,7 +1,7 @@
 {
   "name": "Instacode",
   "description": "Scratchpad for instant JavaScript code running",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Grzegorz Kućmierz",
   "homepage": "https://github.com/gkucmierz/instacode-app",
   "scripts": {
