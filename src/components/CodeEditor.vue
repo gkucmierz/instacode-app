@@ -13,7 +13,7 @@ export default defineComponent({
     Codemirror,
   },
   data() {
-    const extensions = [javascript(), oneDark]
+    const extensions = [javascript(), oneDark];
 
     // Codemirror EditorView instance ref
     const view = shallowRef();
