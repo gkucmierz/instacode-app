@@ -3,6 +3,16 @@ import { defineComponent } from 'vue';
 import HelpModal from './components/HelpModal.vue';
 import ShareModal from './components/ShareModal.vue';
 
+import Analytics from 'analytics';
+import googleAnalytics from '@analytics/google-analytics';
+
+const analytics = Analytics({
+  app: 'instacode-app',
+  plugins: [googleAnalytics({ measurementIds: ['G-919025NJDJ'] })]
+});
+
+analytics.page();
+
 export default defineComponent({
   components: {
     HelpModal,

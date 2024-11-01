@@ -11,8 +11,10 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@analytics/google-analytics": "^1.0.7",
     "@codemirror/lang-javascript": "^6.1.6",
     "@codemirror/theme-one-dark": "^6.1.0",
+    "analytics": "^0.8.14",
     "codemirror": "^6.0.1",
     "copy-to-clipboard": "^3.3.3",
     "eventemitter3": "^4.0.7",
