@@ -36,8 +36,8 @@ export const addDefaultLog = code => {
 
   exprs.map(expr => {
     const { start, end } = expr.loc;
-    insert(end, ');', true);
-    insert(start, 'console.log(');
+    insert(end, '); console.flush(); await __yield();', true);
+    insert(start, 'console.flush(); await __yield(); console.log(');
   });
 
   return lines.join('\n');

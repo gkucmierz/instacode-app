@@ -33,7 +33,7 @@ export const bundleCode = async (code) => {
     const originalLine = lines[lineIndex];
 
     if (dep.type === 'import') {
-      const pkgCode = await resolvePackage(dep.name, dep.version);
+      const { code: pkgCode } = await resolvePackage(dep.name, dep.version);
       // Encode to base64 safely
       const base64 = btoa(unescape(encodeURIComponent(pkgCode)));
       const dataUri = `data:text/javascript;base64,${base64}`;

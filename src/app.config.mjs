@@ -4,18 +4,8 @@ export { default as PACKAGE_JSON } from '../package.json' assert { type: 'json' 
 export const APP_URL = 'https://instacode.app';
 export const MAX_DATA_SIZE = 1e6;
 export const ERROR_MAX_DATA_SIZE = 'Error: Output exceeded maximum size allowed';
-export const WELCOME_CODE = `
-'Hello World!';
-
-new Array(10).fill(0).map((_, i) => '#'.repeat(i+1));
-
-2n ** 42n;
-
-for (let i = 0; i < 42; ++i) {
-  console.log(i);
-}
-
-`;
+import WELCOME_CODE_RAW from './welcome-payload.js?raw';
+export const WELCOME_CODE = WELCOME_CODE_RAW;
 
 // storage unique keys:
 export const STORAGE_KEY_CODE = 'code';

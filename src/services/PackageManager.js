@@ -47,13 +47,26 @@ const saveToCache = async (key, data) => {
 };
 
 export const resolvePackage = async (name, version) => {
-  const cacheKey = `${name}@${version || 'latest'}`;
+  let actualVersion = version;
+  if (!actualVersion || actualVersion === 'latest') {
+    try {
+      const res = await fetch(`https://data.jsdelivr.com/v1/package/resolve/npm/${name}@latest`);
+      if (res.ok) {
+        const data = await res.json();
+        actualVersion = data.version;
+      }
+    } catch (e) {
+      console.warn(`[PackageManager] Failed to resolve latest version for ${name}`, e);
+    }
+  }
+
+  const cacheKey = `${name}@${actualVersion || 'latest'}`;
   
   try {
     const cachedCompressed = await getFromCache(cacheKey);
     if (cachedCompressed) {
       console.log(`[PackageManager] Loaded from IDB Cache: ${cacheKey}`);
-      return LZString.decompressFromUTF16(cachedCompressed);
+      return { code: LZString.decompressFromUTF16(cachedCompressed), version: actualVersion };
     }
   } catch (err) {
     console.warn(`[PackageManager] Failed to read from cache for ${cacheKey}`, err);
@@ -63,7 +76,7 @@ export const resolvePackage = async (name, version) => {
   // We use esm.run (jsDelivr) instead of esm.sh because esm.sh returns root-relative imports (e.g. /v135/...)
   // which fail to resolve when executed from inside a Blob URL or Data URI.
   // esm.run resolves all dependencies to absolute https:// URLs or bundles them inline.
-  const url = `https://esm.run/${name}${version ? `@${version}` : ''}`;
+  const url = `https://esm.run/${name}${actualVersion ? `@${actualVersion}` : ''}`;
   
   try {
     const response = await fetch(url);
@@ -78,7 +91,7 @@ export const resolvePackage = async (name, version) => {
       console.warn(`[PackageManager] Failed to save to cache for ${cacheKey}`, err);
     }
     
-    return code;
+    return { code, version: actualVersion };
   } catch (err) {
     console.error(`[PackageManager] Failed to fetch package ${cacheKey}`, err);
     throw err;

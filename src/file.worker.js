@@ -31,6 +31,7 @@ const limitData = (() => {
 
 const throttledPM = (() => {
   const pm = postMessage;
+  self['nativePostMessage'] = pm;
   self['postMessage'] = log;
   const updateFreq = 50; // times per sec
   const updateDelay = 1e3 / updateFreq;
@@ -63,6 +64,8 @@ const throttledPM = (() => {
   };
 })();
 
+console.flush = () => throttledPM(undefined, true, false);
+
 const l = args => {
   // const data = args.map(el => stringify(el, (val, ind, str) => {
   //   if (getType(val) === 'bigint') return `${val}n`;
@@ -81,35 +84,116 @@ const moduleRegistry = {};
 
 const customRequire = (pkgName) => {
   if (moduleRegistry[pkgName]) {
-    // Return the raw namespace object. 
-    // The AST transformer already handles `.default ||` for default imports.
-    // This allows named imports and namespace imports to work correctly.
     return moduleRegistry[pkgName];
   }
+  
+  // Fallback: if pkgName is without version, find the first loaded version
+  const keys = Object.keys(moduleRegistry);
+  const matchedKey = keys.find(k => k.startsWith(pkgName + '@'));
+  if (matchedKey) return moduleRegistry[matchedKey];
+  
   throw new Error(`Module ${pkgName} not found or failed to load.`);
+};
+let pendingTimers = 0;
+const sendState = () => {
+  const pm = self.nativePostMessage;
+  if (pm && typeof pm === 'function') {
+    pm({ type: 'worker-state', state: pendingTimers > 0 ? 'alive_async' : 'idle' });
+  }
+};
+
+const origSetTimeout = self.setTimeout;
+const origClearTimeout = self.clearTimeout;
+const origSetInterval = self.setInterval;
+const origClearInterval = self.clearInterval;
+const activeTimers = new Set();
+
+self.setTimeout = (cb, ms, ...args) => {
+  const id = origSetTimeout((...a) => {
+    activeTimers.delete(id);
+    pendingTimers--;
+    sendState();
+    cb(...a);
+  }, ms, ...args);
+  activeTimers.add(id);
+  pendingTimers++;
+  sendState();
+  return id;
+};
+
+self.clearTimeout = (id) => {
+  if (activeTimers.has(id)) {
+    activeTimers.delete(id);
+    pendingTimers--;
+    sendState();
+  }
+  origClearTimeout(id);
+};
+
+self.setInterval = (cb, ms, ...args) => {
+  const id = origSetInterval(cb, ms, ...args);
+  activeTimers.add(id);
+  pendingTimers++;
+  sendState();
+  return id;
+};
+
+self.clearInterval = (id) => {
+  if (activeTimers.has(id)) {
+    activeTimers.delete(id);
+    pendingTimers--;
+    sendState();
+  }
+  origClearInterval(id);
 };
 
 addEventListener('message', async ({ data }) => {
+  if (data && data.type === 'ping') {
+    const pm = self.nativePostMessage;
+    if (pm && typeof pm === 'function') pm({ type: 'pong' });
+    return;
+  }
+  
   const { code, settings } = data;
   try {
     const deps = extractDependencies(code);
     
     if (deps.length > 0) {
-      await Promise.all(deps.map(async ({ name, version }) => {
-        if (!moduleRegistry[name]) {
-          if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {
+      await Promise.all(deps.map(async (dep) => {
+        const { name, version, loc, type: typeDep } = dep;
+        if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {
+          if (!moduleRegistry[name]) {
             try {
               moduleRegistry[name] = await import(name);
             } catch (err) {
               console.error(`Failed to load URL module ${name}`, err);
               throw err;
             }
-          } else {
-            const pkgCode = await resolvePackage(name, version);
+          }
+          dep.uniqueName = name;
+        } else {
+          const { code: pkgCode, version: resolvedVersion } = await resolvePackage(name, version);
+          
+          if (!version && resolvedVersion && !dep._notified) {
+            const pm = self.nativePostMessage;
+            if (pm && typeof pm === 'function') {
+              try {
+                pm({ type: 'lock-dependency', line: loc.start.line, name, resolvedVersion, isRequire: typeDep === 'require' });
+                dep._notified = true;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+          
+          const uniqueName = `${name}@${resolvedVersion}`;
+          dep.uniqueName = uniqueName;
+          
+          if (!moduleRegistry[uniqueName]) {
             const blob = new Blob([pkgCode], { type: 'text/javascript' });
             const url = URL.createObjectURL(blob);
             try {
-              moduleRegistry[name] = await import(url);
+              moduleRegistry[uniqueName] = await import(url);
             } catch (err) {
               console.error(`Failed to load module ${name} into memory`, err);
               throw err;
@@ -120,14 +204,42 @@ addEventListener('message', async ({ data }) => {
       }));
     }
 
+    const pm = self.nativePostMessage;
+    if (pm && typeof pm === 'function') {
+      pm({ type: 'loading', state: false });
+    }
+
     let finalCode = transformImports(code);
+    
+    const lines = finalCode.split('\n');
+    for (const dep of deps) {
+      if (!dep.uniqueName || dep.uniqueName === dep.name) continue;
+      const lineIdx = dep.loc.start.line - 1;
+      let lineStr = lines[lineIdx];
+      const quotePattern = `['"\`]${dep.name}['"\`]`;
+      const reqRegex = new RegExp(`require\\s*\\(\\s*${quotePattern}\\s*\\)`);
+      if (reqRegex.test(lineStr)) {
+        lines[lineIdx] = lineStr.replace(reqRegex, `require('${dep.uniqueName}')`);
+      }
+      
+      const impRegex = new RegExp(`import\\s*\\(\\s*${quotePattern}\\s*\\)`);
+      if (impRegex.test(lineStr)) {
+        lines[lineIdx] = lineStr.replace(impRegex, `Promise.resolve(require('${dep.uniqueName}'))`);
+      }
+    }
+    finalCode = lines.join('\n');
     if (settings.autoPrint) {
       finalCode = addDefaultLog(finalCode);
     }
     
-    const runner = new Function('require', finalCode);
-    runner(customRequire);
+    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+    const __yield = () => new Promise(r => setTimeout(r, 0));
+    
+    const runner = new AsyncFunction('require', '__yield', finalCode);
+    await runner(customRequire, __yield);
+    sendState();
   } catch (e) {
     console.error(e);
+    sendState();
   }
 });

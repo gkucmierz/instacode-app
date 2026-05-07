@@ -12,7 +12,7 @@ const extractVersionFromComments = (comments, line) => {
 };
 
 export const extractDependencies = (code) => {
-  const deps = new Map();
+  const deps = [];
   let tree;
   const comments = [];
   try {
@@ -28,7 +28,7 @@ export const extractDependencies = (code) => {
     const name = node.source.value;
     const line = node.loc.start.line;
     const version = extractVersionFromComments(comments, line);
-    deps.set(name, { name, version, type: 'import', loc: node.loc });
+    deps.push({ name, version, type: 'import', loc: node.loc });
   });
 
   // Find all require calls
@@ -40,9 +40,17 @@ export const extractDependencies = (code) => {
         const line = node.loc.start.line;
         const version = extractVersionFromComments(comments, line);
         
-        // Find the parent variable declaration to replace the entire line
-        // Since we are doing a simple walk, we can just use the line number to replace the line text later.
-        deps.set(name, { name, version, type: 'require', loc: node.loc });
+        deps.push({ name, version, type: 'require', loc: node.loc });
+      }
+    }
+    
+    if (node.type === 'CallExpression' && node.callee.type === 'Import') {
+      if (node.arguments.length > 0 && node.arguments[0].type === 'Literal') {
+        const name = node.arguments[0].value;
+        const line = node.loc.start.line;
+        const version = extractVersionFromComments(comments, line);
+        
+        deps.push({ name, version, type: 'dynamic-import', loc: node.loc });
       }
     }
     
@@ -60,7 +68,7 @@ export const extractDependencies = (code) => {
 
   walk(tree);
 
-  return Array.from(deps.values());
+  return deps;
 };
 
 export const transformImports = (code) => {

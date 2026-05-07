@@ -13,6 +13,7 @@ const handleKeydown = (e) => {
   const COMMA_CODE = 188;
   const QUESTION_MARK_CODE = 191;
   const S_KEY_CODE = 83;
+  const H_KEY_CODE = 72;
 
   const cmdCtrl = e.ctrlKey || e.metaKey;
 
@@ -26,7 +27,7 @@ const handleKeydown = (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
-  if (cmdCtrl && e.shiftKey && e.keyCode === QUESTION_MARK_CODE) {
+  if (cmdCtrl && (e.keyCode === H_KEY_CODE || (e.shiftKey && e.keyCode === QUESTION_MARK_CODE))) {
     showHelp.value = !showHelp.value;
     e.preventDefault();
     e.stopPropagation();

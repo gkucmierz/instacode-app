@@ -1,0 +1,13 @@
+services:
+  instacode-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: instacode-app
+    restart: always
+    networks:
+      - npm_public
+
+networks:
+  npm_public:
+    external: true
