@@ -1,4 +1,5 @@
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
 
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
@@ -7,58 +8,63 @@ import codeService from '../services/codeService';
 
 import Worker from '../file.worker.js?worker';
 
-// const lodash = await fetch('https://registry.npmjs.org/lodash');
-
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
-import { defineComponent } from 'vue';
+const worker = ref(null);
+const result = ref('');
 
-export default defineComponent({
-  components: {
-    Splitter, SplitterPanel,
-    ResultCode, CodeEditor,
-  },
-  data() {
-    codeService.ee.on('change', code => this.run(code));
-    return {
-      worker: null,
-      result: '',
-    }
-  },
-  mounted() {
-    this.run(codeService.get());
-  },
-  methods: {
-    run(code) {
-      this.terminate();
-      this.result = '';
-
-      this.worker = new Worker();
-
-      this.worker.onmessage = ({ data }) => {
-        if (data === '') return;
-        this.result += `${data}\n`;
-      };
-
-      this.worker.onerror = error => {
-        this.result += error.message;
-      };
-
-      this.worker.postMessage({
-        code,
-        settings: settingsService.get(),
-      });
-    },
-    terminate() {
-      if (this.worker) {
-        this.worker.terminate();
-        this.worker = null;
-      }
-    },
+const terminate = () => {
+  if (worker.value) {
+    worker.value.terminate();
+    worker.value = null;
   }
+};
+
+const run = (code) => {
+  terminate();
+  result.value = '';
+
+  worker.value = new Worker();
+
+  worker.value.onmessage = ({ data }) => {
+    if (data === '') return;
+    result.value += `${data}\n`;
+  };
+
+  worker.value.onerror = error => {
+    result.value += error.message;
+  };
+
+  worker.value.postMessage({
+    code,
+    settings: settingsService.get(),
+  });
+};
+
+onMounted(() => {
+  codeService.ee.on('change', run);
+  run(codeService.get());
+});
+
+onUnmounted(() => {
+  codeService.ee.off('change', run);
+  terminate();
 });
 </script>
+
+<template>
+  <main>
+    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
+      <SplitterPanel class="left-pane">
+        <CodeEditor/>
+      </SplitterPanel>
+      <SplitterPanel class="right-pane">
+        <ResultCode :data="result"/>
+      </SplitterPanel>
+    </Splitter>
+  </main>
+</template>
 
 <style scoped>
 main {
@@ -86,16 +92,3 @@ main {
   box-shadow: none !important;
 }
 </style>
-
-<template>
-  <main>
-    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
-      <SplitterPanel class="left-pane">
-        <CodeEditor/>
-      </SplitterPanel>
-      <SplitterPanel class="right-pane">
-        <ResultCode :data="result"/>
-      </SplitterPanel>
-    </Splitter>
-  </main>
-</template>

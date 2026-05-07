@@ -1,26 +1,51 @@
-<script>
-import { defineComponent } from 'vue';
+<script setup>
+import { onMounted, onUnmounted } from 'vue';
 
-export default defineComponent({
-  name: 'ModalWindow',
-  props: {
-    visible: Boolean,
-  },
-  data() {
-    window.addEventListener('keydown', e => {
-      if (!e) e = event;
-      if (!this.visible) return;
-      const ESC_KEY = 27;
-      if (e.keyCode === ESC_KEY) {
-        this.$emit('close');
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-    return {};
-  },
+const props = defineProps({
+  visible: Boolean,
+});
+
+const emit = defineEmits(['close']);
+
+const handleKeydown = (e) => {
+  if (!e) e = window.event;
+  if (!props.visible) return;
+  const ESC_KEY = 27;
+  if (e.keyCode === ESC_KEY) {
+    emit('close');
+    e.preventDefault();
+    e.stopPropagation();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
 });
 </script>
+
+<template>
+  <div
+    class="modal-window"
+    :class="{ visible: visible }"
+    @click="emit('close')"
+  >
+    <div class="window" @click.stop>
+      <div class="header">
+        <slot name="header" />
+      </div>
+      <div class="body">
+        <slot name="body" />
+      </div>
+      <div class="footer">
+        <slot name="footer" />
+      </div>
+    </div>
+  </div>
+</template>
 
 <style lang="scss" scoped>
 
@@ -59,23 +84,3 @@ $padding: 12px;
   }
 }
 </style>
-
-<template>
-  <div
-    class="modal-window"
-    :class="{ visible: this.visible }"
-    @click="$emit('close')"
-  >
-    <div class="window" @click.stop>
-      <div class="header">
-        <slot name="header" />
-      </div>
-      <div class="body">
-        <slot name="body" />
-      </div>
-      <div class="footer">
-        <slot name="footer" />
-      </div>
-    </div>
-  </div>
-</template>

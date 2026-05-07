@@ -1,21 +1,25 @@
-<script>
-import { defineComponent } from 'vue';
+<script setup>
+import { ref, watch } from 'vue';
 import settingsService from '../services/settingsService';
 
-export default defineComponent({
-  name: 'ResultCode',
-  props: [
-    'data'
-  ],
-  watch: {
-    data() {
-      if (!settingsService.getItem('autoScroll')) return;
-      const div = this.$refs.div;
-      setTimeout(() => div.scrollTo(0, div.scrollHeight), 1);
-    },
-  }
+const props = defineProps(['data']);
+const div = ref(null);
+
+watch(() => props.data, () => {
+  if (!settingsService.getItem('autoScroll')) return;
+  setTimeout(() => {
+    if (div.value) {
+      div.value.scrollTo(0, div.value.scrollHeight);
+    }
+  }, 1);
 });
 </script>
+
+<template>
+  <div class="result-code" ref="div">
+    <pre class="selectable">{{ data }}</pre>
+  </div>
+</template>
 
 <style lang="scss" scoped>
 .result-code {
@@ -34,9 +38,3 @@ export default defineComponent({
   }
 }
 </style>
-
-<template>
-  <div class="result-code" ref="div">
-    <pre class="selectable">{{ data }}</pre>
-  </div>
-</template>

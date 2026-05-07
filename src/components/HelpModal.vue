@@ -1,49 +1,12 @@
-<script>
-import { defineComponent } from 'vue';
+<script setup>
 import ModalWindow from './ModalWindow.vue';
 
-export default defineComponent({
-  name: 'HelpModal',
-  props: {
-    visible: Boolean,
-  },
-  components: {
-    ModalWindow,
-  },
+defineProps({
+  visible: Boolean,
 });
+
+defineEmits(['close']);
 </script>
-
-<style lang="scss" scoped>
-ul {
-  list-style-type: none;
-  padding: 0;
-
-  li {
-    display: flex;
-    flex: 1 1 0px;
-    flex-wrap: nowrap;
-
-    * {
-      width: 50%;
-    }
-
-    b {
-      padding-right: 4px;
-      white-space: nowrap;
-      text-align: right;
-    }
-    span {
-      padding-left: 4px;
-      white-space: nowrap;
-      text-align: left;
-    }
-  }
-}
-
-b {
-  color: #8f8;
-}
-</style>
 
 <template>
   <div class="help-modal">
@@ -90,3 +53,35 @@ b {
     </ModalWindow>
   </div>
 </template>
+
+<style lang="scss" scoped>
+ul {
+  list-style-type: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    flex: 1 1 0px;
+    flex-wrap: nowrap;
+
+    * {
+      width: 50%;
+    }
+
+    b {
+      padding-right: 4px;
+      white-space: nowrap;
+      text-align: right;
+    }
+    span {
+      padding-left: 4px;
+      white-space: nowrap;
+      text-align: left;
+    }
+  }
+}
+
+b {
+  color: #8f8;
+}
+</style>

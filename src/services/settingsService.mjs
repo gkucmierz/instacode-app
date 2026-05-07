@@ -5,11 +5,17 @@ import { STORAGE_KEY_SETTINGS } from '../app.config';
 // const ee = new EventEmitter();
 let data;
 
+const DEFAULT_SETTINGS = {
+  autoScroll: false,
+  autoPrint: true,
+};
+
 const init = () => {
   try {
-    data = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) ?? '{}');
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) ?? '{}');
+    data = { ...DEFAULT_SETTINGS, ...stored };
   } catch(e) {
-    data = {};
+    data = { ...DEFAULT_SETTINGS };
   }
 };
 

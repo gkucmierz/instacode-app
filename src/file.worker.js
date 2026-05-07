@@ -4,6 +4,8 @@ import { MAX_DATA_SIZE, ERROR_MAX_DATA_SIZE } from './app.config';
 // import { getType } from '@gkucmierz/utils/src/get-type';
 
 import { addDefaultLog } from './utils/utils';
+import { extractDependencies, transformImports } from './utils/parser.mjs';
+import { resolvePackage } from './services/PackageManager.js';
 
 const log = console.log;
 console.log = (...a) => l(a);
@@ -75,11 +77,56 @@ const e = err => {
   throttledPM(data, true);
 };
 
-addEventListener('message', ({ data }) => {
+const moduleRegistry = {};
+
+const customRequire = (pkgName) => {
+  if (moduleRegistry[pkgName]) {
+    // Return the raw namespace object. 
+    // The AST transformer already handles `.default ||` for default imports.
+    // This allows named imports and namespace imports to work correctly.
+    return moduleRegistry[pkgName];
+  }
+  throw new Error(`Module ${pkgName} not found or failed to load.`);
+};
+
+addEventListener('message', async ({ data }) => {
   const { code, settings } = data;
   try {
-    const runner = new Function(settings.autoPrint ? addDefaultLog(code) : code);
-    runner();
+    const deps = extractDependencies(code);
+    
+    if (deps.length > 0) {
+      await Promise.all(deps.map(async ({ name, version }) => {
+        if (!moduleRegistry[name]) {
+          if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {
+            try {
+              moduleRegistry[name] = await import(name);
+            } catch (err) {
+              console.error(`Failed to load URL module ${name}`, err);
+              throw err;
+            }
+          } else {
+            const pkgCode = await resolvePackage(name, version);
+            const blob = new Blob([pkgCode], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            try {
+              moduleRegistry[name] = await import(url);
+            } catch (err) {
+              console.error(`Failed to load module ${name} into memory`, err);
+              throw err;
+            }
+            URL.revokeObjectURL(url);
+          }
+        }
+      }));
+    }
+
+    let finalCode = transformImports(code);
+    if (settings.autoPrint) {
+      finalCode = addDefaultLog(finalCode);
+    }
+    
+    const runner = new Function('require', finalCode);
+    runner(customRequire);
   } catch (e) {
     console.error(e);
   }

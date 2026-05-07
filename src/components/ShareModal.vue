@@ -1,56 +1,61 @@
-<script>
-import { defineComponent } from 'vue';
+<script setup>
+import { ref, watch } from 'vue';
 
 import InputText from 'primevue/inputtext';
 import PrimeButton from 'primevue/button';
 
-import copy from 'copy-to-clipboard';
+import copyToClipboard from 'copy-to-clipboard';
 
 import ModalWindow from './ModalWindow.vue';
 import codeService from '../services/codeService';
+import { bundleCode } from '../services/BundlerService.js';
 
-export default defineComponent({
-  name: 'ShareModal',
-  props: {
-    visible: Boolean,
-  },
-  components: {
-    ModalWindow,
-    InputText,
-    PrimeButton,
-  },
-  data() {
-    return {
-      code: '',
-    };
-  },
-  methods: {
-    encode(code) {
-      return codeService.codeToUrl(code);
-    },
-    copy() {
-      copy(this.encode(this.code));
-      this.$emit('close');
-    },
-  },
-  watch: {
-    visible(visible) {
-      if (!visible) return;
-      this.code = codeService.get();
-    },
-  },
+const props = defineProps({
+  visible: Boolean,
+});
+
+const emit = defineEmits(['close']);
+
+const code = ref('');
+const isBundling = ref(false);
+const bundledCode = ref('');
+
+const encode = (c) => {
+  return codeService.codeToUrl(c);
+};
+
+const copy = () => {
+  copyToClipboard(encode(code.value));
+};
+
+const generateBundle = async () => {
+  isBundling.value = true;
+  try {
+    bundledCode.value = await bundleCode(code.value);
+  } catch (err) {
+    console.error('Bundle failed', err);
+    alert('Bundle failed: ' + err.message);
+  } finally {
+    isBundling.value = false;
+  }
+};
+
+const copyBundle = () => {
+  if (bundledCode.value) {
+    copyToClipboard(bundledCode.value);
+  }
+};
+
+watch(() => props.visible, (visible) => {
+  if (!visible) return;
+  code.value = codeService.get();
+  bundledCode.value = '';
 });
 </script>
 
-<style lang="scss" scoped>
-.p-inputgroup {
-  width: 320px;
-}
-</style>
-
 <template>
   <div class="share-modal">
-    <ModalWindow :visible="visible" @close="$emit('close')">
+    <ModalWindow :visible="visible" @close="emit('close')">
       <template #header>
         <h3>Share Code</h3>
       </template>
@@ -59,10 +64,56 @@ export default defineComponent({
           <InputText :modelValue="encode(code)" readonly />
           <PrimeButton icon="pi pi-copy" class="p-button-info" @click="copy()" />
         </div>
+        <div class="bundle-section">
+          <PrimeButton 
+            v-if="!bundledCode"
+            icon="pi pi-box" 
+            label="Generate Bundle" 
+            class="p-button-success w-full" 
+            @click="generateBundle()" 
+            :loading="isBundling" 
+          />
+          <div v-else>
+            <textarea class="bundle-preview" readonly :value="bundledCode"></textarea>
+            <PrimeButton 
+              icon="pi pi-copy" 
+              label="Copy Bundled Code" 
+              class="p-button-info w-full mt-2" 
+              @click="copyBundle()" 
+            />
+          </div>
+        </div>
       </template>
-      <!-- <template #footer>
-        <button @click="showModal = false">close</button>
-      </template> -->
     </ModalWindow>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.p-inputgroup {
+  min-width: 320px;
+  width: 100%;
+}
+.bundle-section {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.bundle-preview {
+  margin-top: 1rem;
+  width: 100%;
+  height: 120px;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+.w-full {
+  width: 100%;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+</style>
