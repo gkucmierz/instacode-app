@@ -18,7 +18,7 @@ factorsBI(2n ** 81n + 1n);
 
 const exp = 136279841;
 const mPrime52 = 2n ** BigInt(exp) - 1n;
-console.log(`Number of digits biggest known prime number: ${(mPrime52 + '').length}`);
+console.log(`Number of digits biggest lucas lehmer: ${(mPrime52 + '').length}`);
 
 'Lucas-Lehmer Primality Test (Mersenne Primes):'
 import { lucasLehmerBI } from '@gkucmierz/utils' /* @2.0.7 */;
