@@ -28,7 +28,14 @@ export const extractDependencies = (code) => {
     const name = node.source.value;
     const line = node.loc.start.line;
     const version = extractVersionFromComments(comments, line);
-    deps.push({ name, version, type: 'import', loc: node.loc });
+    
+    const specifiers = node.specifiers.map(s => {
+      if (s.type === 'ImportSpecifier') return s.imported.name;
+      if (s.type === 'ImportDefaultSpecifier') return 'default';
+      return null;
+    }).filter(Boolean);
+
+    deps.push({ name, version, type: 'import', loc: node.loc, specifiers });
   });
 
   // Find all require calls
