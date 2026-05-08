@@ -21,7 +21,7 @@ let pingInterval = null;
 
 const statusText = computed(() => {
   switch (workerStatus.value) {
-    case 'idle': return 'Ready';
+    case 'idle': return 'Idle / Waiting for input...';
     case 'loading': return 'Loading packages...';
     case 'evaluating': return 'Evaluating...';
     case 'alive_async': return 'Background thread (async)';
@@ -121,7 +121,7 @@ onUnmounted(() => {
       </SplitterPanel>
     </Splitter>
 
-    <div class="worker-status" v-if="workerStatus !== 'idle'">
+    <div class="worker-status">
       <div class="status-dot" :class="workerStatus"></div>
       <span>{{ statusText }}</span>
     </div>
