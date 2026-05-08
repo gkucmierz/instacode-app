@@ -1,34 +1,53 @@
-# instacode-app
+# ⚡️ Instacode
 
-This template should help get you started developing with Vue 3 in Vite.
+**Instacode** is a powerful, strictly in-browser Javascript sandbox designed for evaluating heavy computational code without freezing the UI. Built with Vue 3 and Vite, it leverages Web Workers and Abstract Syntax Tree (AST) transformations to safely execute user scripts "on the fly".
 
-## Recommended IDE Setup
+## ✨ Key Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- 🛡️ **Zero-Blocking Architecture:** Never freeze your browser again. Instacode automatically injects non-blocking yield instructions into your code, allowing even massive CPU-bound tasks (like calculating Lucas-Lehmer primes with `BigInt`) to run smoothly while keeping the Event Loop breathing.
+- 📦 **Dynamic Sandbox Imports:** Seamlessly use external dependencies. Instacode's AST parser intercepts native `import()` and `ImportDeclaration` statements, fetching packages from external registries directly into the Worker's virtual file system in a fraction of a second.
+- ⚡️ **Real-Time Log Streaming:** Forget waiting for a 100% CPU task to finish before seeing the output. Our custom IPC stream with `console.flush()` pushes your logs to the UI instantly, line by line.
+- 🛠️ **Modern Stack:** Built on top of **Vue 3** and **Vite** for a blazing fast developer experience.
 
-## Customize configuration
+## 🧠 How it works (Under the Hood)
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+When you write code in Instacode:
+1. We parse your script into an AST (Abstract Syntax Tree) using the Meriyah parser.
+2. We inject micro-task yields (`await __yield()`) and `console.flush()` hooks into your standard logging functions.
+3. The transformed code runs inside a secure Web Worker context wrapped in an `AsyncFunction`.
+4. Dependencies are resolved and fetched on-demand, linking via our custom loader.
 
-## Project Setup
+## 🚀 Development Setup
+
+We recommend using [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar).
+
+### Installation
+
+Clone the repository and install dependencies:
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Start Development Server
+
+Compile and hot-reload for development:
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Production Build
+
+Compile and minify for production:
 
 ```sh
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Linting
+
+Lint the codebase with [ESLint](https://eslint.org/):
 
 ```sh
 npm run lint
