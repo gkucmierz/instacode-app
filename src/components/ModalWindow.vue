@@ -28,23 +28,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="modal-window"
-    :class="{ visible: visible }"
-    @click="emit('close')"
-  >
-    <div class="window" @click.stop>
-      <div class="header">
-        <slot name="header" />
-      </div>
-      <div class="body">
-        <slot name="body" />
-      </div>
-      <div class="footer">
-        <slot name="footer" />
+  <Teleport to="body">
+    <div
+      class="modal-window"
+      :class="{ visible: visible }"
+      @click="emit('close')"
+    >
+      <div class="window" @click.stop>
+        <div class="header">
+          <slot name="header" />
+        </div>
+        <div class="body">
+          <slot name="body" />
+        </div>
+        <div class="footer">
+          <slot name="footer" />
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -57,10 +59,11 @@ $padding: 12px;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: 9999;
   padding: 0;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.2);
 
   display: flex;
   justify-content: center;

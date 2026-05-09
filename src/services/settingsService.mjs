@@ -26,12 +26,6 @@ const DEFAULT_SETTINGS = {
       format: '{baseUrl}{id}?module',
       replacePattern: null,
       replaceWith: null
-    },
-    {
-      url: 'https://gitea.7u.pl/',
-      format: '{baseUrl}{repoPath}/raw/branch/main/main.mjs',
-      replacePattern: null,
-      replaceWith: null
     }
   ]
 };
@@ -62,7 +56,7 @@ const settingsService = {
     return data;
   },
   set(value) {
-    data = { ...data, ...value };
+    data = { ...data, ...JSON.parse(JSON.stringify(value)) };
     save();
   },
   // ee,

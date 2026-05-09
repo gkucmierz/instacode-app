@@ -246,6 +246,9 @@ addEventListener('message', async ({ data }) => {
     await runner(customRequire, __yield);
     sendState();
   } catch (e) {
+    const pm = self.nativePostMessage;
+    if (pm && typeof pm === 'function') pm({ type: 'loading', state: false });
+    
     console.error(e);
     sendState();
   }

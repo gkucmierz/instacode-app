@@ -95,12 +95,6 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
       format: '{baseUrl}{id}?module',
       replacePattern: null,
       replaceWith: null
-    },
-    {
-      url: 'https://gitea.7u.pl/',
-      format: '{baseUrl}{repoPath}/raw/branch/main/main.mjs',
-      replacePattern: null,
-      replaceWith: null
     }
   ];
 
@@ -129,9 +123,6 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
         replaceWith = `$1https://cdn.jsdelivr.net/$2`;
       } else if (baseUrl.includes('unpkg')) {
         url = `${baseUrl}${id}?module`;
-      } else if (baseUrl.includes('gitea.7u.pl')) {
-        const repoPath = name.startsWith('@') ? name.substring(1) : name;
-        url = `${baseUrl}${repoPath}/raw/branch/main/main.mjs`;
       } else {
         url = `${baseUrl}${id}`;
       }
@@ -171,15 +162,6 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
         code = code.replace(/import\s*['"]\/([^'"]+)['"]/g, `import "${origin}/$1"`);
       }
       
-      // Gitea unbundled ESM support: resolve relative imports to absolute raw URLs
-      if (baseUrl.includes('gitea.7u.pl')) {
-        const repoPath = name.startsWith('@') ? name.substring(1) : name;
-        const rawBase = `${baseUrl}${repoPath}/raw/branch/main`;
-        code = code.replace(/from\s*['"]\.\/([^'"]+)['"]/g, `from "${rawBase}/$1"`);
-        code = code.replace(/import\s*\(\s*['"]\.\/([^'"]+)['"]\s*\)/g, `import("${rawBase}/$1")`);
-        code = code.replace(/import\s*['"]\.\/([^'"]+)['"]/g, `import "${rawBase}/$1"`);
-      }
-      
       try {
         const compressed = LZString.compressToUTF16(code);
         await saveToCache(cacheKey, compressed);
@@ -208,15 +190,18 @@ export const getAllCachedPackages = async () => {
     
     request.onerror = () => reject(request.error);
     request.onsuccess = (e) => {
-      const cursor = e.target.result;
-      if (cursor) {
-        const data = cursor.value;
-        // String length * 2 bytes (UTF-16)
-        const sizeKB = ((data.length * 2) / 1024).toFixed(1);
-        packages.push({ key: cursor.key, sizeKB });
-        cursor.continue();
-      } else {
-        resolve(packages);
+      try {
+        const cursor = e.target.result;
+        if (cursor) {
+          const data = cursor.value;
+          const sizeKB = data ? ((data.length * 2) / 1024).toFixed(1) : '0.0';
+          packages.push({ key: cursor.key, sizeKB });
+          cursor.continue();
+        } else {
+          resolve(packages);
+        }
+      } catch (err) {
+        reject(err);
       }
     };
   });
