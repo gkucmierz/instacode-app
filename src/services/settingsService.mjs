@@ -10,16 +10,16 @@ const DEFAULT_SETTINGS = {
   autoPrint: true,
   cdns: [
     {
-      url: 'https://esm.sh/',
-      format: '{baseUrl}{id}?standalone{exports}',
-      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
-      replaceWith: "$1https://esm.sh/$2"
-    },
-    {
       url: 'https://cdn.jsdelivr.net/npm/',
       format: '{baseUrl}{id}/+esm',
       replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
       replaceWith: "$1https://cdn.jsdelivr.net/$2"
+    },
+    {
+      url: 'https://esm.sh/',
+      format: '{baseUrl}{id}?bundle{exports}',
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
+      replaceWith: "$1https://esm.sh/$2"
     },
     {
       url: 'https://unpkg.com/',

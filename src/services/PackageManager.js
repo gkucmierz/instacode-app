@@ -2,7 +2,7 @@ import LZString from 'lz-string';
 
 const DB_NAME = 'InstacodeDB';
 const STORE_NAME = 'packages';
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 let dbInstance = null;
 
@@ -17,9 +17,11 @@ const getDB = () => {
     };
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
+      if (db.objectStoreNames.contains(STORE_NAME)) {
+        db.deleteObjectStore(STORE_NAME);
       }
+      db.createObjectStore(STORE_NAME);
+      
       if (db.objectStoreNames.contains('packages_v2')) {
         db.deleteObjectStore('packages_v2');
       }
@@ -77,16 +79,16 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
 
   const cdnList = (cdns && cdns.length > 0) ? cdns : [
     {
-      url: 'https://esm.sh/',
-      format: '{baseUrl}{id}?standalone{exports}',
-      replacePattern: null,
-      replaceWith: null
-    },
-    {
       url: 'https://cdn.jsdelivr.net/npm/',
       format: '{baseUrl}{id}/+esm',
-      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/npm\\/",
-      replaceWith: "$1https://cdn.jsdelivr.net/npm/"
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
+      replaceWith: "$1https://cdn.jsdelivr.net/$2"
+    },
+    {
+      url: 'https://esm.sh/',
+      format: '{baseUrl}{id}?bundle{exports}',
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
+      replaceWith: "$1https://esm.sh/$2"
     },
     {
       url: 'https://unpkg.com/',
@@ -112,7 +114,7 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
     if (isString) {
       // Legacy string fallback
       if (baseUrl.includes('esm.sh')) {
-        url = `${baseUrl}${id}?standalone${exportsStr}`;
+        url = `${baseUrl}${id}?bundle${exportsStr}`;
         replacePattern = "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])";
         replaceWith = `$1https://esm.sh/$2`;
       } else if (baseUrl.includes('jsdelivr')) {
