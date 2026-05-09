@@ -1,5 +1,6 @@
 import { extractDependencies } from '../utils/parser.mjs';
 import { resolvePackage } from './PackageManager.js';
+import settingsService from './settingsService.mjs';
 
 export const bundleCode = async (code, treeShake = false) => {
   const deps = extractDependencies(code);
@@ -19,9 +20,10 @@ export const bundleCode = async (code, treeShake = false) => {
 
     const lineIndex = dep.loc.start.line - 1;
     const originalLine = lines[lineIndex];
+    const cdns = settingsService.getItem('cdns') || [];
 
     if (dep.type === 'import') {
-      const { code: pkgCode } = await resolvePackage(dep.name, dep.version, treeShake, dep.specifiers);
+      const { code: pkgCode } = await resolvePackage(dep.name, dep.version, treeShake, dep.specifiers, cdns);
       // Encode to base64 safely
       const base64 = btoa(unescape(encodeURIComponent(pkgCode)));
       const dataUri = `data:text/javascript;base64,${base64}`;
@@ -32,7 +34,7 @@ export const bundleCode = async (code, treeShake = false) => {
       
     } else if (dep.type === 'require') {
       // Fetch ESM equivalent and hoist it as an import to properly bundle require dependencies
-      const { code: pkgCode } = await resolvePackage(dep.name, dep.version, treeShake, dep.specifiers);
+      const { code: pkgCode } = await resolvePackage(dep.name, dep.version, treeShake, dep.specifiers, cdns);
       const base64 = btoa(unescape(encodeURIComponent(pkgCode)));
       const dataUri = `data:text/javascript;base64,${base64}`;
       

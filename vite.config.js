@@ -9,6 +9,9 @@ const packageJSON = JSON.parse(readFileSync('./package.json'));
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJSON.version),
+  },
   plugins: [
     vue(),
     VitePWA({

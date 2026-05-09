@@ -94,11 +94,10 @@ const customRequire = (pkgName) => {
   
   throw new Error(`Module ${pkgName} not found or failed to load.`);
 };
-let pendingTimers = 0;
 const sendState = () => {
   const pm = self.nativePostMessage;
   if (pm && typeof pm === 'function') {
-    pm({ type: 'worker-state', state: pendingTimers > 0 ? 'alive_async' : 'idle' });
+    pm({ type: 'worker-state', state: activeTimers.size > 0 ? 'alive_async' : 'idle' });
   }
 };
 
@@ -109,39 +108,47 @@ const origClearInterval = self.clearInterval;
 const activeTimers = new Set();
 
 self.setTimeout = (cb, ms, ...args) => {
+  const stack = new Error().stack || '';
+  const isSystemTimer = stack.includes('@vite') || stack.includes('vue-devtools') || stack.includes('extension-');
+  
   const id = origSetTimeout((...a) => {
-    activeTimers.delete(id);
-    pendingTimers--;
-    sendState();
+    if (!isSystemTimer) {
+      activeTimers.delete(id);
+      sendState();
+    }
     cb(...a);
   }, ms, ...args);
-  activeTimers.add(id);
-  pendingTimers++;
-  sendState();
+  
+  if (!isSystemTimer) {
+    activeTimers.add(id);
+    sendState();
+  }
   return id;
 };
 
 self.clearTimeout = (id) => {
   if (activeTimers.has(id)) {
     activeTimers.delete(id);
-    pendingTimers--;
     sendState();
   }
   origClearTimeout(id);
 };
 
 self.setInterval = (cb, ms, ...args) => {
+  const stack = new Error().stack || '';
+  const isSystemTimer = stack.includes('@vite') || stack.includes('vue-devtools') || stack.includes('extension-');
+
   const id = origSetInterval(cb, ms, ...args);
-  activeTimers.add(id);
-  pendingTimers++;
-  sendState();
+  if (!isSystemTimer) {
+    activeTimers.add(id);
+    sendState();
+  }
   return id;
 };
 
 self.clearInterval = (id) => {
   if (activeTimers.has(id)) {
     activeTimers.delete(id);
-    pendingTimers--;
     sendState();
   }
   origClearInterval(id);
@@ -150,7 +157,7 @@ self.clearInterval = (id) => {
 addEventListener('message', async ({ data }) => {
   if (data && data.type === 'ping') {
     const pm = self.nativePostMessage;
-    if (pm && typeof pm === 'function') pm({ type: 'pong' });
+    if (pm && typeof pm === 'function') pm({ type: 'pong', state: activeTimers.size > 0 ? 'alive_async' : 'idle' });
     return;
   }
   
@@ -172,7 +179,7 @@ addEventListener('message', async ({ data }) => {
           }
           dep.uniqueName = name;
         } else {
-          const { code: pkgCode, version: resolvedVersion } = await resolvePackage(name, version);
+          const { code: pkgCode, version: resolvedVersion } = await resolvePackage(name, version, settings?.treeShake, [], settings?.cdns);
           
           if (!version && resolvedVersion && !dep._notified) {
             const pm = self.nativePostMessage;
@@ -193,7 +200,7 @@ addEventListener('message', async ({ data }) => {
             const blob = new Blob([pkgCode], { type: 'text/javascript' });
             const url = URL.createObjectURL(blob);
             try {
-              moduleRegistry[uniqueName] = await import(url);
+              moduleRegistry[uniqueName] = await import(/* @vite-ignore */ url);
             } catch (err) {
               console.error(`Failed to load module ${name} into memory`, err);
               throw err;

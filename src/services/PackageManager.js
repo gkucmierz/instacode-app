@@ -49,7 +49,7 @@ const saveToCache = async (key, data) => {
   });
 };
 
-export const resolvePackage = async (name, version, treeShake = false, specifiers = []) => {
+export const resolvePackage = async (name, version, treeShake = false, specifiers = [], cdns = []) => {
   let actualVersion = version;
   if (!actualVersion || actualVersion === 'latest') {
     try {
@@ -75,35 +75,103 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
     console.warn(`[PackageManager] Failed to read from cache for ${cacheKey}`, err);
   }
 
-  console.log(`[PackageManager] Fetching from CDN: ${cacheKey}`);
-  let url;
-  if (treeShake && specifiers && specifiers.length > 0) {
-    url = `https://esm.sh/${name}${actualVersion ? `@${actualVersion}` : ''}?standalone&exports=${specifiers.join(',')}`;
-  } else {
-    // We use ?standalone to bundle ALL nested dependencies into a single file.
-    // This solves the root-relative import issue (/v135/...) with Data URIs,
-    // and ensures 100% offline capability since all nested dependencies are cached locally.
-    url = `https://esm.sh/${name}${actualVersion ? `@${actualVersion}` : ''}?standalone`;
-  }
-  
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-    
-    const code = await response.text();
-    
-    try {
-      const compressed = LZString.compressToUTF16(code);
-      await saveToCache(cacheKey, compressed);
-    } catch (err) {
-      console.warn(`[PackageManager] Failed to save to cache for ${cacheKey}`, err);
+  const cdnList = (cdns && cdns.length > 0) ? cdns : [
+    {
+      url: 'https://esm.sh/',
+      format: '{baseUrl}{id}?standalone{exports}',
+      replacePattern: null,
+      replaceWith: null
+    },
+    {
+      url: 'https://cdn.jsdelivr.net/npm/',
+      format: '{baseUrl}{id}/+esm',
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/npm\\/",
+      replaceWith: "$1https://cdn.jsdelivr.net/npm/"
+    },
+    {
+      url: 'https://unpkg.com/',
+      format: '{baseUrl}{id}?module',
+      replacePattern: null,
+      replaceWith: null
     }
+  ];
+
+  let lastError = null;
+
+  for (const cdn of cdnList) {
+    const isString = typeof cdn === 'string';
+    const cdnUrl = isString ? cdn : cdn.url;
+    const baseUrl = cdnUrl.endsWith('/') ? cdnUrl : cdnUrl + '/';
+    const id = `${name}${actualVersion ? `@${actualVersion}` : ''}`;
+    const exportsStr = (treeShake && specifiers && specifiers.length > 0) ? `&exports=${specifiers.join(',')}` : '';
     
-    return { code, version: actualVersion };
-  } catch (err) {
-    console.error(`[PackageManager] Failed to fetch package ${cacheKey}`, err);
-    throw err;
+    let url;
+    let replacePattern = null;
+    let replaceWith = null;
+
+    if (isString) {
+      // Legacy string fallback
+      if (baseUrl.includes('esm.sh')) {
+        url = `${baseUrl}${id}?standalone${exportsStr}`;
+        replacePattern = "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])";
+        replaceWith = `$1https://esm.sh/$2`;
+      } else if (baseUrl.includes('jsdelivr')) {
+        url = `${baseUrl}${id}/+esm`;
+        replacePattern = "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])";
+        replaceWith = `$1https://cdn.jsdelivr.net/$2`;
+      } else if (baseUrl.includes('unpkg')) {
+        url = `${baseUrl}${id}?module`;
+      } else {
+        url = `${baseUrl}${id}`;
+      }
+    } else {
+      url = (cdn.format || '{baseUrl}{id}')
+        .replace('{baseUrl}', baseUrl)
+        .replace('{id}', id)
+        .replace('{exports}', exportsStr);
+      replacePattern = cdn.replacePattern;
+      replaceWith = cdn.replaceWith;
+    }
+
+    console.log(`[PackageManager] Fetching from CDN: ${url}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+      let code = await response.text();
+      
+      if (replacePattern && replaceWith) {
+        try {
+          const regex = new RegExp(replacePattern, 'g');
+          code = code.replace(regex, replaceWith);
+        } catch(e) {
+          console.error(`[PackageManager] Invalid regex in CDN config: ${replacePattern}`, e);
+        }
+      }
+
+      // Fallback robust replacements for root-relative imports if they still exist (e.g. from esm.sh proxy modules)
+      if (baseUrl.includes('esm.sh') || baseUrl.includes('jsdelivr')) {
+        const origin = new URL(baseUrl).origin;
+        code = code.replace(/from\s*['"]\/([^'"]+)['"]/g, `from "${origin}/$1"`);
+        code = code.replace(/import\s*\(\s*['"]\/([^'"]+)['"]\s*\)/g, `import("${origin}/$1")`);
+        code = code.replace(/import\s*['"]\/([^'"]+)['"]/g, `import "${origin}/$1"`);
+      }
+      
+      try {
+        const compressed = LZString.compressToUTF16(code);
+        await saveToCache(cacheKey, compressed);
+      } catch (err) {
+        console.warn(`[PackageManager] Failed to save to cache for ${cacheKey}`, err);
+      }
+      
+      return { code, version: actualVersion };
+    } catch (err) {
+      console.warn(`[PackageManager] CDN ${baseUrl} failed for ${cacheKey}:`, err.message);
+      lastError = err;
+    }
   }
+
+  console.error(`[PackageManager] All CDNs failed for ${cacheKey}`);
+  throw lastError || new Error(`All CDNs failed for ${cacheKey}`);
 };
 
 export const getAllCachedPackages = async () => {

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import SettingsView from '../views/SettingsView.vue';
-import AboutView from '../views/AboutView.vue';
+
 
 import codeService from '../services/codeService';
 import { SHARE_CODE_ROUTE_NAME } from '../app.config';
@@ -26,11 +26,6 @@ const router = createRouter({
         codeService.setFromUrl(to.params.encoded);
         return { name: 'home' };
       },
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: AboutView,
     }
   ]
 })

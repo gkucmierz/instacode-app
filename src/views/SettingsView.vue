@@ -20,6 +20,26 @@ const DEFAULT_SETTINGS = {
   autoPrint: true,
   treeShake: true,
   theme: 'oneDark',
+  cdns: [
+    {
+      url: 'https://esm.sh/',
+      format: '{baseUrl}{id}?standalone{exports}',
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
+      replaceWith: "$1https://esm.sh/$2"
+    },
+    {
+      url: 'https://cdn.jsdelivr.net/npm/',
+      format: '{baseUrl}{id}/+esm',
+      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
+      replaceWith: "$1https://cdn.jsdelivr.net/$2"
+    },
+    {
+      url: 'https://unpkg.com/',
+      format: '{baseUrl}{id}?module',
+      replacePattern: null,
+      replaceWith: null
+    }
+  ]
 };
 
 const THEMES = [

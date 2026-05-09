@@ -3,6 +3,7 @@
 // Shortcuts:
 // Cmd/Ctrl + H  -> Help
 // Cmd/Ctrl + ,  -> Settings
+// Cmd/Ctrl + I  -> About
 // Cmd/Ctrl + S  -> Share Code
 // ----------------------------------------------------
 
@@ -24,3 +25,8 @@ console.log(`Number of digits biggest lucas lehmer: ${(mPrime52 + '').length}`);
 import { lucasLehmerBI } from '@gkucmierz/utils' /* @2.0.7 */;
 const isPrime = lucasLehmerBI(127, true);
 console.log(`Is M127 prime? ${isPrime}`);
+
+// import { setSafeInterval } from '@gkucmierz/utils';
+// setSafeInterval(() => {
+//   console.log(Date.now());
+// }, 1e3);

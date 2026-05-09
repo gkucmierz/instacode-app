@@ -63,8 +63,8 @@ const run = (code) => {
     if (typeof data === 'object') {
       if (data.type === 'pong') {
         lastPongReceived = Date.now();
-        if (workerStatus.value === 'blocked') {
-           workerStatus.value = 'evaluating';
+        if (data.state && workerStatus.value !== data.state) {
+           workerStatus.value = data.state;
         }
         return;
       }

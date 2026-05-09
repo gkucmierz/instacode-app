@@ -3,9 +3,11 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import HelpModal from './components/HelpModal.vue';
 import ShareModal from './components/ShareModal.vue';
+import AboutModal from './components/AboutModal.vue';
 
 const showHelp = ref(false);
 const showShare = ref(false);
+const showAbout = ref(false);
 const router = useRouter();
 
 const handleKeydown = (e) => {
@@ -14,6 +16,7 @@ const handleKeydown = (e) => {
   const QUESTION_MARK_CODE = 191;
   const S_KEY_CODE = 83;
   const H_KEY_CODE = 72;
+  const I_KEY_CODE = 73;
 
   const cmdCtrl = e.ctrlKey || e.metaKey;
 
@@ -32,20 +35,26 @@ const handleKeydown = (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
+  if (cmdCtrl && e.keyCode === I_KEY_CODE) {
+    showAbout.value = !showAbout.value;
+    e.preventDefault();
+    e.stopPropagation();
+  }
 };
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keydown', handleKeydown, { capture: true });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('keydown', handleKeydown, { capture: true });
 });
 </script>
 
 <template>
   <HelpModal :visible="showHelp" @close="showHelp = false" />
   <ShareModal :visible="showShare" @close="showShare = false" />
+  <AboutModal :visible="showAbout" @close="showAbout = false" />
   <RouterView />
 </template>
 
