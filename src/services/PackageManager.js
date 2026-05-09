@@ -2,7 +2,7 @@ import LZString from 'lz-string';
 
 const DB_NAME = 'InstacodeDB';
 const STORE_NAME = 'packages';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance = null;
 
@@ -19,6 +19,9 @@ const getDB = () => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
+      }
+      if (db.objectStoreNames.contains('packages_v2')) {
+        db.deleteObjectStore('packages_v2');
       }
     };
   });
