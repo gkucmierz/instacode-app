@@ -9,6 +9,7 @@ import copyToClipboard from 'copy-to-clipboard';
 import ModalWindow from './ModalWindow.vue';
 import codeService from '../services/codeService';
 import { bundleCode } from '../services/BundlerService.js';
+import settingsService from '../services/settingsService.mjs';
 
 const props = defineProps({
   visible: Boolean,
@@ -31,7 +32,8 @@ const copy = () => {
 const generateBundle = async () => {
   isBundling.value = true;
   try {
-    bundledCode.value = await bundleCode(code.value);
+    const treeShake = settingsService.getItem('treeShake') || false;
+    bundledCode.value = await bundleCode(code.value, treeShake);
   } catch (err) {
     console.error('Bundle failed', err);
     alert('Bundle failed: ' + err.message);

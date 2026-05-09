@@ -1,7 +1,7 @@
 import LZString from 'lz-string';
 
 const DB_NAME = 'InstacodeDB';
-const STORE_NAME = 'packages_v2';
+const STORE_NAME = 'packages';
 const DB_VERSION = 1;
 
 let dbInstance = null;
@@ -46,7 +46,7 @@ const saveToCache = async (key, data) => {
   });
 };
 
-export const resolvePackage = async (name, version) => {
+export const resolvePackage = async (name, version, treeShake = false, specifiers = []) => {
   let actualVersion = version;
   if (!actualVersion || actualVersion === 'latest') {
     try {
@@ -60,7 +60,7 @@ export const resolvePackage = async (name, version) => {
     }
   }
 
-  const cacheKey = `${name}@${actualVersion || 'latest'}`;
+  const cacheKey = `${name}@${actualVersion || 'latest'}${treeShake && specifiers && specifiers.length > 0 ? `?exports=${specifiers.join(',')}` : ''}`;
   
   try {
     const cachedCompressed = await getFromCache(cacheKey);
@@ -73,10 +73,15 @@ export const resolvePackage = async (name, version) => {
   }
 
   console.log(`[PackageManager] Fetching from CDN: ${cacheKey}`);
-  // We use esm.run (jsDelivr) instead of esm.sh because esm.sh returns root-relative imports (e.g. /v135/...)
-  // which fail to resolve when executed from inside a Blob URL or Data URI.
-  // esm.run resolves all dependencies to absolute https:// URLs or bundles them inline.
-  const url = `https://esm.run/${name}${actualVersion ? `@${actualVersion}` : ''}`;
+  let url;
+  if (treeShake && specifiers && specifiers.length > 0) {
+    url = `https://esm.sh/${name}${actualVersion ? `@${actualVersion}` : ''}?standalone&exports=${specifiers.join(',')}`;
+  } else {
+    // We use ?standalone to bundle ALL nested dependencies into a single file.
+    // This solves the root-relative import issue (/v135/...) with Data URIs,
+    // and ensures 100% offline capability since all nested dependencies are cached locally.
+    url = `https://esm.sh/${name}${actualVersion ? `@${actualVersion}` : ''}?standalone`;
+  }
   
   try {
     const response = await fetch(url);

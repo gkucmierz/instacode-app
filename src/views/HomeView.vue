@@ -19,6 +19,18 @@ const workerStatus = ref('idle');
 let lastPongReceived = Date.now();
 let pingInterval = null;
 
+const themeBgMap = {
+  oneDark: '#282c34',
+  dracula: '#282a36',
+  githubDark: '#0d1117',
+  githubLight: '#ffffff',
+  nord: '#2e3440',
+  monokai: '#272822',
+  material: '#263238',
+  eclipse: '#ffffff'
+};
+const bgColor = themeBgMap[settingsService.getItem('theme')] || '#282c34';
+
 const statusText = computed(() => {
   switch (workerStatus.value) {
     case 'idle': return 'Idle / Waiting for input...';
@@ -110,7 +122,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main style="position: relative">
+  <main :style="{ backgroundColor: bgColor, position: 'relative' }">
     <ProgressBar v-if="isLoading" mode="indeterminate" style="height: 3px; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000; border-radius: 0" />
     <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
       <SplitterPanel class="left-pane">
@@ -188,9 +200,16 @@ main {
 <style>
 .p-splitter {
   border: none !important;
+  background: transparent !important;
 }
 .p-splitter-gutter {
   outline-width: 0;
+  background: rgba(128, 128, 128, 0.05) !important;
+  transition: background-color 0.2s;
+}
+.p-splitter-gutter:hover,
+.p-splitter-gutter:active {
+  background: rgba(128, 128, 128, 0.2) !important;
 }
 .p-splitter-gutter-handle:focus {
   box-shadow: none !important;

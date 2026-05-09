@@ -18,6 +18,7 @@ import { getAllCachedPackages, removePackageFromCache, clearCache } from '../ser
 const DEFAULT_SETTINGS = {
   autoScroll: false,
   autoPrint: true,
+  treeShake: true,
   theme: 'oneDark',
 };
 
@@ -152,6 +153,11 @@ onUnmounted(() => {
             <p class="item">
               <label for="autoPrint" style="margin-left: 0; margin-right: 12px; width: 150px">Auto print expressions</label>
               <InputSwitch v-model="so.autoPrint" inputId="autoPrint" />
+            </p>
+
+            <p class="item">
+              <label for="treeShake" style="margin-left: 0; margin-right: 12px; width: 150px">Tree Shaking (Bundle)</label>
+              <InputSwitch v-model="so.treeShake" inputId="treeShake" />
             </p>
 
             <p class="item">
