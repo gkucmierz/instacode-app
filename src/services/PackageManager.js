@@ -95,6 +95,12 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
       format: '{baseUrl}{id}?module',
       replacePattern: null,
       replaceWith: null
+    },
+    {
+      url: 'https://gitea.7u.pl/',
+      format: '{baseUrl}{repoPath}/raw/branch/main/main.mjs',
+      replacePattern: null,
+      replaceWith: null
     }
   ];
 
@@ -123,13 +129,20 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
         replaceWith = `$1https://cdn.jsdelivr.net/$2`;
       } else if (baseUrl.includes('unpkg')) {
         url = `${baseUrl}${id}?module`;
+      } else if (baseUrl.includes('gitea.7u.pl')) {
+        const repoPath = name.startsWith('@') ? name.substring(1) : name;
+        url = `${baseUrl}${repoPath}/raw/branch/main/main.mjs`;
       } else {
         url = `${baseUrl}${id}`;
       }
     } else {
+      const repoPath = name.startsWith('@') ? name.substring(1) : name;
       url = (cdn.format || '{baseUrl}{id}')
         .replace('{baseUrl}', baseUrl)
         .replace('{id}', id)
+        .replace('{name}', name)
+        .replace('{version}', actualVersion || '')
+        .replace('{repoPath}', repoPath)
         .replace('{exports}', exportsStr);
       replacePattern = cdn.replacePattern;
       replaceWith = cdn.replaceWith;
@@ -156,6 +169,15 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
         code = code.replace(/from\s*['"]\/([^'"]+)['"]/g, `from "${origin}/$1"`);
         code = code.replace(/import\s*\(\s*['"]\/([^'"]+)['"]\s*\)/g, `import("${origin}/$1")`);
         code = code.replace(/import\s*['"]\/([^'"]+)['"]/g, `import "${origin}/$1"`);
+      }
+      
+      // Gitea unbundled ESM support: resolve relative imports to absolute raw URLs
+      if (baseUrl.includes('gitea.7u.pl')) {
+        const repoPath = name.startsWith('@') ? name.substring(1) : name;
+        const rawBase = `${baseUrl}${repoPath}/raw/branch/main`;
+        code = code.replace(/from\s*['"]\.\/([^'"]+)['"]/g, `from "${rawBase}/$1"`);
+        code = code.replace(/import\s*\(\s*['"]\.\/([^'"]+)['"]\s*\)/g, `import("${rawBase}/$1")`);
+        code = code.replace(/import\s*['"]\.\/([^'"]+)['"]/g, `import "${rawBase}/$1"`);
       }
       
       try {
