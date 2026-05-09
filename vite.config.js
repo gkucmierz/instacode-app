@@ -139,5 +139,8 @@ export default defineConfig({
     port: 5026,
     strictPort: true,
   },
-  // base: '/instacode-app/',
+  build: {
+    target: 'esnext',
+    cssTarget: 'chrome100'
+  }
 })

@@ -62,8 +62,6 @@ $padding: 12px;
   z-index: 9999;
   padding: 0;
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.2);
 
   display: flex;
   justify-content: center;
