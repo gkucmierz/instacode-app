@@ -68,12 +68,16 @@ $padding: 12px;
   align-items: center;
 
   visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  
   &.visible {
     visibility: visible;
+    opacity: 1;
   }
 
   .window {
-    padding: $padding $padding * 4;
+    padding: $padding * 4;
     border-radius: $padding * 2;
     // height: calc(100% - 100px);
     // width: calc(100% - 100px);

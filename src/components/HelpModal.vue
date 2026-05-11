@@ -98,7 +98,7 @@ onMounted(() => {
     font-weight: 600;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
       color: #c9d1d9;

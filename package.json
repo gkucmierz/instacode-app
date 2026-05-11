@@ -21,6 +21,7 @@
     "javascript-stringify": "^2.1.0",
     "lz-string": "^1.4.4",
     "meriyah": "^4.3.3",
+    "nano-ui": "^1.0.1",
     "normalize.css": "^8.0.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.18.0",

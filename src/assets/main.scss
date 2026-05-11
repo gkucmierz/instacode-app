@@ -91,3 +91,21 @@ select:focus,
   border-color: #555 !important;
   transition: border-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
+
+/* Fix NanoUI Ripple Overflow on PrimeVue components */
+.p-button,
+.p-tabmenuitem .p-menuitem-link,
+.p-tabview-nav-link {
+  position: relative;
+  overflow: hidden !important;
+}
+
+/* Restore Production Gray Background for Tabs */
+.p-tabview .p-tabview-nav li .p-tabview-nav-link,
+.p-tabview .p-tabview-nav {
+  background: #2a323d !important;
+}
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background: #3f4b5b !important;
+}
+

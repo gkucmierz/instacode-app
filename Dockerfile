@@ -3,7 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
+RUN npm install nano-ui@latest --registry=https://gitea.7u.pl/api/packages/gkucmierz/npm/ --legacy-peer-deps
 
 COPY . .
 RUN npm run build
