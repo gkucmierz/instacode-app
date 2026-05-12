@@ -109,6 +109,50 @@ const handleRemovePackage = async (key) => {
   await fetchCache();
 };
 
+const handleRemoveGroup = async (group) => {
+  if (confirm(`Are you sure you want to remove all cached versions of ${group.name}?`)) {
+    for (const pkg of group.versions) {
+      await removePackageFromCache(pkg.key);
+    }
+    await fetchCache();
+  }
+};
+
+const groupedPackages = computed(() => {
+  const groups = {};
+  cachedPackages.value.forEach(pkg => {
+    const lastAtIdx = pkg.key.lastIndexOf('@');
+    let name = pkg.key;
+    let version = '';
+    
+    if (lastAtIdx > 0) {
+      name = pkg.key.substring(0, lastAtIdx);
+      version = pkg.key.substring(lastAtIdx + 1);
+    }
+    
+    if (!groups[name]) {
+      groups[name] = {
+        name,
+        totalSizeKB: 0,
+        versions: []
+      };
+    }
+    
+    groups[name].totalSizeKB += parseFloat(pkg.sizeKB || 0);
+    groups[name].versions.push({
+      ...pkg,
+      version
+    });
+  });
+  
+  // Sort versions descending within each group, and sort groups alphabetically
+  Object.values(groups).forEach(g => {
+    g.versions.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+  });
+  
+  return Object.values(groups).sort((a, b) => a.name.localeCompare(b.name));
+});
+
 const handleClearCache = async () => {
   if (confirm('Are you sure you want to clear the entire NPM cache?')) {
     await clearCache();
@@ -222,17 +266,31 @@ onUnmounted(() => {
           <div v-if="isCacheLoading" class="cache-loading">Loading cache...</div>
           <div v-else-if="cachedPackages.length === 0" class="cache-empty">Cache is empty.</div>
           <ul v-else class="cache-list">
-            <li v-for="pkg in cachedPackages" :key="pkg.key" class="cache-item">
-              <div class="pkg-info">
-                <span class="pkg-name">{{ pkg.key }}</span>
-                <span class="pkg-size">{{ pkg.sizeKB }} KB</span>
-              </div>
-              <PrimeButton 
-                icon="pi pi-times" 
-                class="p-button-rounded p-button-danger p-button-text p-button-sm" 
-                @click="handleRemovePackage(pkg.key)" 
-              />
-            </li>
+            <template v-for="group in groupedPackages" :key="group.name">
+              <li class="cache-group-header">
+                <div class="pkg-info">
+                  <span class="pkg-name">{{ group.name }}</span>
+                  <span class="pkg-size">Total: {{ group.totalSizeKB.toFixed(2) }} KB</span>
+                </div>
+                <PrimeButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-danger p-button-text p-button-sm" 
+                  title="Clear all versions"
+                  @click="handleRemoveGroup(group)" 
+                />
+              </li>
+              <li v-for="pkg in group.versions" :key="pkg.key" class="cache-item version-item">
+                <div class="pkg-info">
+                  <span class="pkg-version">v{{ pkg.version }}</span>
+                  <span class="pkg-size">{{ pkg.sizeKB }} KB</span>
+                </div>
+                <PrimeButton 
+                  icon="pi pi-times" 
+                  class="p-button-rounded p-button-danger p-button-text p-button-sm" 
+                  @click="handleRemovePackage(pkg.key)" 
+                />
+              </li>
+            </template>
           </ul>
         </div>
       </TabPanel>
@@ -304,15 +362,14 @@ onUnmounted(() => {
       padding: 0;
       margin: 0;
 
-      .cache-item {
+      .cache-group-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
-        border-radius: 4px;
-        background-color: #1e1e1e;
-        margin-bottom: 0.5rem;
-
+        padding: 0.5rem 0.5rem 0.25rem 0.5rem;
+        margin-top: 1rem;
+        border-bottom: 1px solid #333;
+        
         .pkg-info {
           display: flex;
           flex-direction: column;
@@ -320,6 +377,34 @@ onUnmounted(() => {
           .pkg-name {
             font-family: monospace;
             font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+          }
+          .pkg-size {
+            font-size: 0.8rem;
+            color: #888;
+          }
+        }
+      }
+
+      .cache-item.version-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        margin-bottom: 2px;
+        background-color: #1e1e1e;
+        border-radius: 4px;
+        margin-left: 1rem;
+
+        .pkg-info {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1rem;
+
+          .pkg-version {
+            font-family: monospace;
             color: #d4d4d4;
           }
 
