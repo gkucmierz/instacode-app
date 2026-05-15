@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
             </div>
 
             <p class="description">
-              A lightning-fast, zero-configuration JavaScript/TypeScript scratchpad designed for maximum focus and
+              A lightning-fast, zero-configuration JavaScript scratchpad designed for maximum focus and
               speed.
             </p>
 
