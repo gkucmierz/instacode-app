@@ -124,7 +124,7 @@ onUnmounted(() => {
 <template>
   <main :style="{ backgroundColor: bgColor, position: 'relative' }">
     <ProgressBar v-if="isLoading" mode="indeterminate" style="height: 3px; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000; border-radius: 0" />
-    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal">
+    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal" stateKey="instacode-splitter-state" stateStorage="local">
       <SplitterPanel class="left-pane">
         <CodeEditor/>
       </SplitterPanel>

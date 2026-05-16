@@ -8,8 +8,10 @@ import * as allThemes from '@uiw/codemirror-themes-all';
 import settingsService from '../services/settingsService';
 import { linter, forceLinting } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
+import { autocompletion } from '@codemirror/autocomplete';
+import { getPackageExports } from '../services/PackageManager.js';
 
-import codeService from '../services/codeService';
+import codeService from '../services/codeService.mjs';
 
 const myLinter = linter((view) => {
   const suggestions = codeService.getSuggestions();
@@ -86,7 +88,40 @@ const themesMap = {
 
 const currentTheme = themesMap[settingsService.getItem('theme')] || oneDark;
 
-const extensions = [javascript(), currentTheme, myLinter, customTheme];
+const myCompletions = async (context) => {
+  const line = context.state.doc.lineAt(context.pos);
+  const text = line.text;
+  
+  const importRegex = /^import\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/;
+  const match = importRegex.exec(text);
+  
+  if (match) {
+    const pkgName = match[2];
+    const braceStart = text.indexOf('{');
+    const braceEnd = text.indexOf('}');
+    const cursorInLine = context.pos - line.from;
+    
+    if (cursorInLine > braceStart && (braceEnd === -1 || cursorInLine <= braceEnd)) {
+      let word = context.matchBefore(/[\w]*/);
+      if (word.from === word.to && !context.explicit) return null;
+      
+      const cdns = settingsService.getItem('cdns') || [];
+      const exportsList = await getPackageExports(pkgName, 'latest', cdns);
+      
+      return {
+        from: word.from,
+        options: exportsList.map(e => ({
+          label: e,
+          type: "variable",
+          info: `from ${pkgName}`
+        }))
+      };
+    }
+  }
+  return null;
+};
+
+const extensions = [javascript(), currentTheme, myLinter, customTheme, autocompletion({ override: [myCompletions] })];
 const view = shallowRef();
 const code = ref(codeService.get());
 

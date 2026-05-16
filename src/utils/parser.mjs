@@ -134,3 +134,38 @@ export const transformImports = (code) => {
 
   return lines.join('\n');
 };
+
+export const extractExports = (code) => {
+  const exports = new Set();
+  let tree;
+  try {
+    tree = parse(code, { module: true, next: true });
+  } catch (e) {
+    return [];
+  }
+
+  tree.body.forEach(node => {
+    if (node.type === 'ExportNamedDeclaration') {
+      if (node.declaration) {
+        if (node.declaration.type === 'VariableDeclaration') {
+          node.declaration.declarations.forEach(d => {
+            if (d.id.type === 'Identifier') exports.add(d.id.name);
+          });
+        } else if (node.declaration.type === 'FunctionDeclaration' || node.declaration.type === 'ClassDeclaration') {
+          if (node.declaration.id && node.declaration.id.name) {
+            exports.add(node.declaration.id.name);
+          }
+        }
+      }
+      if (node.specifiers) {
+        node.specifiers.forEach(s => {
+          if (s.exported && s.exported.name) exports.add(s.exported.name);
+        });
+      }
+    } else if (node.type === 'ExportDefaultDeclaration') {
+      exports.add('default');
+    }
+  });
+
+  return Array.from(exports);
+};

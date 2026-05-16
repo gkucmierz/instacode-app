@@ -1,4 +1,5 @@
 import LZString from 'lz-string';
+import { extractExports } from '../utils/parser.mjs';
 
 const DB_NAME = 'InstacodeDB';
 const STORE_NAME = 'packages';
@@ -178,6 +179,16 @@ export const resolvePackage = async (name, version, treeShake = false, specifier
 
   console.error(`[PackageManager] All CDNs failed for ${cacheKey}`);
   throw lastError || new Error(`All CDNs failed for ${cacheKey}`);
+};
+
+export const getPackageExports = async (name, version = 'latest', cdns = []) => {
+  try {
+    const { code } = await resolvePackage(name, version, false, [], cdns);
+    return extractExports(code);
+  } catch (err) {
+    console.warn(`[PackageManager] Failed to get exports for ${name}`, err);
+    return [];
+  }
 };
 
 export const getAllCachedPackages = async () => {
