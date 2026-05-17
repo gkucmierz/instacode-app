@@ -1,9 +1,7 @@
-
-// import EventEmitter from 'eventemitter3';
+import { reactive } from 'vue';
 import { STORAGE_KEY_SETTINGS } from '../app.config';
 
-// const ee = new EventEmitter();
-let data;
+const data = reactive({});
 
 const DEFAULT_SETTINGS = {
   autoScroll: false,
@@ -33,9 +31,9 @@ const DEFAULT_SETTINGS = {
 const init = () => {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) ?? '{}');
-    data = { ...DEFAULT_SETTINGS, ...stored };
+    Object.assign(data, DEFAULT_SETTINGS, stored);
   } catch(e) {
-    data = { ...DEFAULT_SETTINGS };
+    Object.assign(data, DEFAULT_SETTINGS);
   }
 };
 
@@ -56,12 +54,11 @@ const settingsService = {
     return data;
   },
   set(value) {
-    data = { ...data, ...JSON.parse(JSON.stringify(value)) };
+    Object.assign(data, JSON.parse(JSON.stringify(value)));
     save();
-  },
-  // ee,
+  }
 };
 
-export default settingsService;
-
 init();
+
+export default settingsService;

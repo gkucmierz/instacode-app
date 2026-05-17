@@ -11,28 +11,106 @@ import Worker from '../file.worker.js?worker';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import ProgressBar from 'primevue/progressbar';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+import { setSafeInterval } from '@gkucmierz/utils';
 
-const worker = ref(null);
-const result = ref('');
-const isLoading = ref(false);
-const workerStatus = ref('idle');
-let lastPongReceived = Date.now();
-let pingInterval = null;
+const tabs = ref(codeService.getTabs());
+const activeTabIndex = ref(tabs.value.findIndex(t => t.id === codeService.getActiveTabId()));
 
-const themeBgMap = {
-  oneDark: '#282c34',
-  dracula: '#282a36',
-  githubDark: '#0d1117',
-  githubLight: '#ffffff',
-  nord: '#2e3440',
-  monokai: '#272822',
-  material: '#263238',
-  eclipse: '#ffffff'
+const updateTabs = () => {
+  tabs.value = [...codeService.getTabs()];
+  const idx = tabs.value.findIndex(t => t.id === codeService.getActiveTabId());
+  if (idx !== -1 && idx !== activeTabIndex.value) {
+    activeTabIndex.value = idx;
+  }
 };
-const bgColor = themeBgMap[settingsService.getItem('theme')] || '#282c34';
+
+const onTabChange = (index) => {
+  activeTabIndex.value = index;
+  const tab = tabs.value[index];
+  if (tab) {
+    codeService.setActiveTab(tab.id);
+  }
+};
+
+const handleKeydown = (e) => {
+  if (!e) e = window.event;
+  const cmdCtrl = e.ctrlKey || e.metaKey;
+
+  // Cmd+N (New Tab)
+  if (cmdCtrl && e.keyCode === 78) {
+    e.preventDefault();
+    codeService.newTab('');
+  }
+  
+  // Cmd+W (Close Tab)
+  if (cmdCtrl && e.keyCode === 87 && !e.shiftKey) {
+    e.preventDefault();
+    codeService.closeTab(codeService.getActiveTabId());
+  }
+
+  // Cmd+Shift+W or Cmd+Shift+T (Restore Tab)
+  if (cmdCtrl && e.shiftKey && (e.keyCode === 87 || e.keyCode === 84)) {
+    e.preventDefault();
+    codeService.restoreTab();
+  }
+};
+
+const tabStates = ref({});
+
+const initTabStates = () => {
+  tabs.value.forEach(tab => {
+    if (!tabStates.value[tab.id]) {
+      tabStates.value[tab.id] = {
+        worker: null,
+        result: '',
+        isLoading: false,
+        workerStatus: 'idle',
+        lastPongReceived: Date.now(),
+        pingInterval: null
+      };
+    }
+  });
+};
+initTabStates(); // Initialize immediately before render
+
+const getTabState = (tabId) => {
+  return tabStates.value[tabId] || tabStates.value[tabs.value[0]?.id];
+};
+
+const activeTabState = computed(() => {
+  const tab = tabs.value[activeTabIndex.value];
+  return tab ? getTabState(tab.id) : null;
+});
+
+const themeMap = {
+  oneDark: { bg: '#282c34', tabBg: '#21252b', activeTab: '#282c34', text: '#abb2bf', activeText: '#ffffff', border: '#56b6c2' },
+  dracula: { bg: '#282a36', tabBg: '#1e1f29', activeTab: '#282a36', text: '#6272a4', activeText: '#f8f8f2', border: '#bd93f9' },
+  githubDark: { bg: '#0d1117', tabBg: '#010409', activeTab: '#0d1117', text: '#8b949e', activeText: '#c9d1d9', border: '#f78166' },
+  githubLight: { bg: '#ffffff', tabBg: '#f6f8fa', activeTab: '#ffffff', text: '#57606a', activeText: '#24292f', border: '#0969da' },
+  nord: { bg: '#2e3440', tabBg: '#242933', activeTab: '#2e3440', text: '#d8dee9', activeText: '#eceff4', border: '#88c0d0' },
+  monokai: { bg: '#272822', tabBg: '#1e1f1c', activeTab: '#272822', text: '#75715e', activeText: '#f8f8f2', border: '#a6e22e' },
+  material: { bg: '#263238', tabBg: '#1e272c', activeTab: '#263238', text: '#546e7a', activeText: '#eeffff', border: '#80cbc4' },
+  eclipse: { bg: '#ffffff', tabBg: '#f0f0f0', activeTab: '#ffffff', text: '#7f7f7f', activeText: '#000000', border: '#0000ff' }
+};
+
+// React to settingsService changes if they occur
+const currentTheme = computed(() => themeMap[settingsService.getItem('theme')] || themeMap.oneDark);
+
+const mainStyle = computed(() => ({
+  backgroundColor: currentTheme.value.bg,
+  position: 'relative',
+  '--tab-bg': currentTheme.value.tabBg,
+  '--tab-active-bg': currentTheme.value.activeTab,
+  '--tab-text': currentTheme.value.text,
+  '--tab-active-text': currentTheme.value.activeText,
+  '--tab-border': currentTheme.value.border
+}));
 
 const statusText = computed(() => {
-  switch (workerStatus.value) {
+  if (!activeTabState.value) return '';
+  switch (activeTabState.value.workerStatus) {
     case 'idle': return 'Idle / Waiting for input...';
     case 'loading': return 'Loading packages...';
     case 'evaluating': return 'Evaluating...';
@@ -42,34 +120,41 @@ const statusText = computed(() => {
   }
 });
 
-const terminate = () => {
-  if (worker.value) {
-    worker.value.terminate();
-    worker.value = null;
+const terminate = (tabId) => {
+  const state = getTabState(tabId);
+  if (state.worker) {
+    state.worker.terminate();
+    state.worker = null;
+  }
+  if (state.pingInterval) {
+    state.pingInterval(); // Call the cancel function returned by setSafeInterval
+    state.pingInterval = null;
   }
 };
 
-const run = (code) => {
-  terminate();
+const run = ({ tabId, code }) => {
+  terminate(tabId);
   codeService.clearSuggestions();
-  result.value = '';
-  isLoading.value = true;
-  workerStatus.value = 'loading';
-  lastPongReceived = Date.now();
+  
+  const state = getTabState(tabId);
+  state.result = '';
+  state.isLoading = true;
+  state.workerStatus = 'loading';
+  state.lastPongReceived = Date.now();
 
-  worker.value = new Worker();
+  state.worker = new Worker(new URL('../file.worker.js', import.meta.url), { type: 'module' });
 
-  worker.value.onmessage = ({ data }) => {
+  state.worker.onmessage = ({ data }) => {
     if (typeof data === 'object') {
       if (data.type === 'pong') {
-        lastPongReceived = Date.now();
-        if (data.state && workerStatus.value !== data.state) {
-           workerStatus.value = data.state;
+        state.lastPongReceived = Date.now();
+        if (data.state && state.workerStatus !== data.state) {
+           state.workerStatus = data.state;
         }
         return;
       }
       if (data.type === 'worker-state') {
-        workerStatus.value = data.state;
+        state.workerStatus = data.state;
         return;
       }
       if (data.type === 'lock-dependency') {
@@ -77,64 +162,87 @@ const run = (code) => {
         return;
       }
       if (data.type === 'loading') {
-        isLoading.value = data.state;
+        state.isLoading = data.state;
         if (!data.state) {
-          workerStatus.value = 'evaluating';
-          lastPongReceived = Date.now();
+          state.workerStatus = 'evaluating';
+          state.lastPongReceived = Date.now();
         }
         return;
       }
     }
 
     if (data === '') return;
-    result.value += `${data}\n`;
+    state.result += `${data}\n`;
   };
 
-  worker.value.onerror = error => {
-    result.value += error.message;
+  state.worker.onerror = error => {
+    state.result += error.message;
   };
 
-  worker.value.postMessage({
+  state.worker.postMessage({
     code,
-    settings: settingsService.get(),
+    settings: JSON.parse(JSON.stringify(settingsService.get())),
   });
+
+  state.pingInterval = setSafeInterval(() => {
+    if (state.worker) {
+      state.worker.postMessage({ type: 'ping' });
+      if (Date.now() - state.lastPongReceived > 400 && state.workerStatus !== 'idle' && state.workerStatus !== 'loading') {
+        state.workerStatus = 'blocked';
+      }
+    }
+  }, 200);
 };
 
 onMounted(() => {
   codeService.ee.on('change', run);
-  run(codeService.get());
-
-  pingInterval = setInterval(() => {
-    if (worker.value) {
-      worker.value.postMessage({ type: 'ping' });
-      if (Date.now() - lastPongReceived > 400 && workerStatus.value !== 'idle' && workerStatus.value !== 'loading') {
-        workerStatus.value = 'blocked';
-      }
-    }
-  }, 200);
+  codeService.ee.on('tabs-changed', () => {
+    updateTabs();
+    initTabStates();
+  });
+  window.addEventListener('keydown', handleKeydown, { capture: true });
+  
+  // Initialize all existing tabs
+  tabs.value.forEach(tab => {
+    run({ tabId: tab.id, code: tab.code });
+  });
 });
 
 onUnmounted(() => {
   codeService.ee.off('change', run);
-  terminate();
-  clearInterval(pingInterval);
+  codeService.ee.off('tabs-changed', updateTabs);
+  window.removeEventListener('keydown', handleKeydown, { capture: true });
+  tabs.value.forEach(tab => terminate(tab.id));
 });
 </script>
 
 <template>
-  <main :style="{ backgroundColor: bgColor, position: 'relative' }">
-    <ProgressBar v-if="isLoading" mode="indeterminate" style="height: 3px; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000; border-radius: 0" />
-    <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal" stateKey="instacode-splitter-state" stateStorage="local">
-      <SplitterPanel class="left-pane">
-        <CodeEditor/>
-      </SplitterPanel>
-      <SplitterPanel class="right-pane">
-        <ResultCode :data="result"/>
-      </SplitterPanel>
-    </Splitter>
+  <main :style="mainStyle">
+    <ProgressBar v-if="activeTabState?.isLoading" mode="indeterminate" style="height: 3px; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000; border-radius: 0" />
+    <TabView :activeIndex="activeTabIndex" @update:activeIndex="onTabChange" class="code-tabs">
+      <TabPanel v-for="tab in tabs" :key="tab.id">
+        <template #header>
+          <div class="tab-header">
+            <div class="status-dot-mini" :class="getTabState(tab.id).workerStatus" :title="getTabState(tab.id).workerStatus"></div>
+            <span>{{ tab.title }}</span>
+            <i class="pi pi-times close-icon" @click.stop="codeService.closeTab(tab.id)" v-if="tabs.length > 1"></i>
+          </div>
+        </template>
+        <div class="editor-container">
+          <Splitter style="height: 100%" :step="50" :gutterSize="8" layout="horizontal" stateKey="instacode-splitter-state" stateStorage="local">
+            <SplitterPanel class="left-pane">
+              <CodeEditor :tabId="tab.id"/>
+            </SplitterPanel>
+            <SplitterPanel class="right-pane">
+              <ResultCode :data="getTabState(tab.id).result"/>
+            </SplitterPanel>
+          </Splitter>
+        </div>
+      </TabPanel>
+    </TabView>
 
-    <div class="worker-status">
-      <div class="status-dot" :class="workerStatus"></div>
+    <div class="worker-status" v-if="activeTabState">
+      <div class="status-dot" :class="activeTabState.workerStatus"></div>
       <span>{{ statusText }}</span>
     </div>
   </main>
@@ -196,6 +304,48 @@ main {
   50% { opacity: 0.2; }
   100% { opacity: 1; }
 }
+
+.tab-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-header span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  display: inline-block;
+}
+
+.status-dot-mini {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  transition: background-color 0.3s;
+}
+.status-dot-mini.idle { background-color: #4caf50; }
+.status-dot-mini.loading { background-color: #2196f3; animation: pulse 1s infinite; }
+.status-dot-mini.evaluating { background-color: #2196f3; animation: pulse 1s infinite; }
+.status-dot-mini.alive_async { background-color: #2196f3; }
+.status-dot-mini.blocked { background-color: #f44336; animation: blink 0.4s infinite; }
+
+.close-icon {
+  font-size: 0.8rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+.close-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ff5252;
+}
+
+.editor-container {
+  height: 100%;
+}
 </style>
 <style>
 .p-splitter {
@@ -213,5 +363,75 @@ main {
 }
 .p-splitter-gutter-handle:focus {
   box-shadow: none !important;
+}
+
+/* TabView overrides for full height editor */
+.code-tabs.p-tabview {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.code-tabs .p-tabview-panels {
+  flex: 1;
+  padding: 0;
+  height: calc(100% - 34px); /* Adjusted for new smaller tab header height */
+  overflow: hidden;
+  background: transparent;
+}
+.code-tabs .p-tabview-panel {
+  height: 100%;
+}
+.code-tabs .p-tabview-nav-content {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.code-tabs .p-tabview-ink-bar {
+  display: none !important;
+}
+
+.code-tabs .p-tabview-nav {
+  display: flex;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.code-tabs .p-tabview-nav::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+.code-tabs .p-tabview-nav-link {
+  background: var(--tab-bg) !important;
+  color: var(--tab-text) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0.8rem !important; /* Smaller height */
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+.code-tabs .p-tabview-nav-link:hover {
+  color: var(--tab-active-text) !important;
+}
+.code-tabs .p-tabview-header.p-highlight .p-tabview-nav-link {
+  background: var(--tab-active-bg) !important;
+  color: var(--tab-active-text) !important;
+  border-bottom: 2px solid var(--tab-border) !important;
+}
+
+/* Close icon styling to match text */
+.code-tabs .p-tabview-nav-link .close-icon {
+  color: var(--tab-text);
+  opacity: 0.6;
+}
+.code-tabs .p-tabview-header.p-highlight .p-tabview-nav-link .close-icon {
+  color: var(--tab-active-text);
+  opacity: 0.8;
+}
+.code-tabs .p-tabview-nav-link .close-icon:hover {
+  opacity: 1;
+  color: #ff5252 !important;
 }
 </style>

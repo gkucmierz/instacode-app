@@ -34,3 +34,7 @@ coverage
 *.pub
 *.key
 *.crx
+
+# Playwright
+playwright-report/
+test-results/

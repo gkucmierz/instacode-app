@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import HelpModal from './components/HelpModal.vue';
 import ShareModal from './components/ShareModal.vue';
 import AboutModal from './components/AboutModal.vue';
+import PwaReloadPrompt from './components/PwaReloadPrompt.vue';
 
 const showHelp = ref(false);
 const showShare = ref(false);
@@ -55,7 +56,12 @@ onUnmounted(() => {
   <HelpModal :visible="showHelp" @close="showHelp = false" />
   <ShareModal :visible="showShare" @close="showShare = false" />
   <AboutModal :visible="showAbout" @close="showAbout = false" />
-  <RouterView />
+  <PwaReloadPrompt />
+  <RouterView v-slot="{ Component }">
+    <keep-alive>
+      <component :is="Component" />
+    </keep-alive>
+  </RouterView>
 </template>
 
 <style lang="scss" scoped>

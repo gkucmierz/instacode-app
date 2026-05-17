@@ -205,7 +205,7 @@ onUnmounted(() => {
 
 <template>
   <div class="settings">
-    <TabView>
+    <TabView class="settings-tabs">
       <TabPanel header="General">
         <div class="general-tab-content">
           <div class="switches">
@@ -300,13 +300,32 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .settings {
-  padding: 12px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  :deep(.settings-tabs) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .p-tabview-panels {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .p-tabview-nav-link {
+      padding: 0.5rem 1rem !important; /* Smaller height, matching HomeView roughly */
+      font-size: 0.85rem;
+    }
+  }
 
   .general-tab-content {
     display: flex;
     gap: 2rem;
-    margin-top: 1rem;
-    align-items: flex-start;
+    height: 100%;
+    align-items: stretch;
   }
 
   .switches {

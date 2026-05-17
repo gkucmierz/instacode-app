@@ -22,10 +22,37 @@ const router = createRouter({
     {
       path: `/${SHARE_CODE_ROUTE_NAME}/:encoded`,
       name: SHARE_CODE_ROUTE_NAME,
-      redirect: to => {
+      beforeEnter: (to, from, next) => {
         codeService.setFromUrl(to.params.encoded);
-        return { name: 'home' };
+        next({ name: 'home' });
       },
+    },
+    {
+      path: '/gist/:user/:id',
+      name: 'gist-with-user',
+      beforeEnter: (to, from, next) => {
+        next({ name: 'gist', params: { id: to.params.id } });
+      }
+    },
+    {
+      path: '/gist/:id',
+      name: 'gist',
+      beforeEnter: async (to, from, next) => {
+        try {
+          const res = await fetch(`https://api.github.com/gists/${to.params.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            const files = Object.values(data.files || {});
+            const jsFile = files.find(f => f.language === 'JavaScript' || f.filename.endsWith('.js')) || files[0];
+            if (jsFile && jsFile.content) {
+              codeService.newTab(jsFile.content, jsFile.filename);
+            }
+          }
+        } catch (e) {
+          console.error('[Router] Failed to load gist:', e);
+        }
+        next({ name: 'home' });
+      }
     }
   ]
 })

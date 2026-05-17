@@ -20,7 +20,7 @@ export default defineConfig({
         /* other options */
       },
 
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       },
@@ -141,6 +141,7 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    cssTarget: 'chrome100'
+    cssTarget: 'chrome100',
+    chunkSizeWarningLimit: 1500
   }
 })

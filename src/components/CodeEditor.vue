@@ -2,7 +2,7 @@
 import { shallowRef, ref } from 'vue';
 
 import { Codemirror } from 'vue-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import * as allThemes from '@uiw/codemirror-themes-all';
 import settingsService from '../services/settingsService';
@@ -75,6 +75,8 @@ const customTheme = EditorView.theme({
   }
 });
 
+import { computed } from 'vue';
+
 const themesMap = {
   oneDark,
   dracula: allThemes.dracula,
@@ -86,7 +88,7 @@ const themesMap = {
   eclipse: allThemes.eclipse
 };
 
-const currentTheme = themesMap[settingsService.getItem('theme')] || oneDark;
+const currentTheme = computed(() => themesMap[settingsService.getItem('theme')] || oneDark);
 
 const myCompletions = async (context) => {
   const line = context.state.doc.lineAt(context.pos);
@@ -121,19 +123,19 @@ const myCompletions = async (context) => {
   return null;
 };
 
-const extensions = [javascript(), currentTheme, myLinter, customTheme, autocompletion({ override: [myCompletions] })];
+const props = defineProps({
+  tabId: String
+});
+
+const extensions = computed(() => [javascript(), currentTheme.value, myLinter, customTheme, autocompletion(), javascriptLanguage.data.of({ autocomplete: myCompletions })]);
 const view = shallowRef();
-const code = ref(codeService.get());
+const code = ref(codeService.getTab(props.tabId)?.code || '');
 
 const handleReady = payload => {
   view.value = payload.view;
 };
 
-const change = (newCode) => {
-  codeService.change(newCode);
-};
-
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, watch } from 'vue';
 
 const syncCode = (newCode) => {
   if (code.value !== newCode) {
@@ -141,17 +143,21 @@ const syncCode = (newCode) => {
   }
 };
 
+watch(code, (newCode) => {
+  codeService.change(newCode, props.tabId);
+});
+
 const handleSuggestionsChanged = () => {
   if (view.value) forceLinting(view.value);
 };
 
 onMounted(() => {
-  codeService.ee.on('change', syncCode);
+  codeService.ee.on(`change:${props.tabId}`, syncCode);
   codeService.ee.on('suggestions-changed', handleSuggestionsChanged);
 });
 
 onUnmounted(() => {
-  codeService.ee.off('change', syncCode);
+  codeService.ee.off(`change:${props.tabId}`, syncCode);
   codeService.ee.off('suggestions-changed', handleSuggestionsChanged);
 });
 </script>
@@ -159,7 +165,7 @@ onUnmounted(() => {
 <template>
   <div class="code">
     <codemirror
-      :modelValue="code"
+      v-model="code"
       placeholder="Code goes here..."
       :style="{ height: '100%' }"
       :autofocus="true"
@@ -167,7 +173,6 @@ onUnmounted(() => {
       :tab-size="2"
       :extensions="extensions"
       @ready="handleReady"
-      @change="change($event)"
     />
   </div>
 </template>

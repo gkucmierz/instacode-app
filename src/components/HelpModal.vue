@@ -58,6 +58,35 @@ onMounted(() => {
           </li>
           <li>
             <div class="shortcut-keys">
+              <kbd v-if="isMac">⌘ Cmd</kbd><kbd v-else>Ctrl</kbd>
+              <span class="plus">+</span>
+              <kbd>n</kbd>
+            </div>
+            <span class="desc">&mdash; open new tab</span>
+          </li>
+          <li>
+            <div class="shortcut-keys">
+              <kbd v-if="isMac">⌘ Cmd</kbd><kbd v-else>Ctrl</kbd>
+              <span class="plus">+</span>
+              <kbd>w</kbd>
+            </div>
+            <span class="desc">&mdash; close current tab</span>
+          </li>
+          <li>
+            <div class="shortcut-keys">
+              <kbd v-if="isMac">⌘ Cmd</kbd><kbd v-else>Ctrl</kbd>
+              <span class="plus">+</span>
+              <kbd>Shift</kbd>
+              <span class="plus">+</span>
+              <kbd>t</kbd>
+            </div>
+            <span class="desc">
+              &mdash; reopen closed tab
+              <span class="alt-key">(or <kbd v-if="isMac">⌘ Cmd</kbd><kbd v-else>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>w</kbd>)</span>
+            </span>
+          </li>
+          <li>
+            <div class="shortcut-keys">
               <kbd>ESC</kbd>
             </div>
             <span class="desc">&mdash; close window</span>
