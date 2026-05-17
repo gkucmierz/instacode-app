@@ -39,13 +39,22 @@ const router = createRouter({
       name: 'gist',
       beforeEnter: async (to, from, next) => {
         try {
-          const headers = { 'Cache-Control': 'no-cache' };
+          const headers = {};
           const token = settingsService.getItem('githubToken');
           if (token) {
             headers['Authorization'] = `token ${token}`;
           }
 
-          const res = await fetch(`https://api.github.com/gists/${to.params.id}?t=${Date.now()}`, { headers });
+          const targetUrl = `https://api.github.com/gists/${to.params.id}?t=${Date.now()}`;
+          let res;
+          
+          try {
+            res = await fetch(targetUrl, { headers });
+          } catch (fetchErr) {
+            console.warn('[Router] Direct fetch failed, falling back to proxy...', fetchErr);
+            const proxyUrl = `https://cors-proxy.7u.pl/?url=${encodeURIComponent(targetUrl)}`;
+            res = await fetch(proxyUrl, { headers });
+          }
           
           if (res.ok) {
             const data = await res.json();
@@ -60,6 +69,7 @@ const router = createRouter({
           }
         } catch (e) {
           console.error('[Router] Failed to load gist:', e);
+          codeService.newTab(`// ERROR: Failed to load Gist.\n// Reason: ${e.message}`, 'Error');
         }
         next({ name: 'home' });
       }
