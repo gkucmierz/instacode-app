@@ -5,6 +5,8 @@
 // Cmd/Ctrl + ,  -> Settings
 // Cmd/Ctrl + I  -> About
 // Cmd/Ctrl + S  -> Share Code
+// Cmd/Ctrl + N  -> New Tab
+// Cmd/Ctrl + W  -> Close Tab
 // ----------------------------------------------------
 
 'Hello World!';

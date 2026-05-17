@@ -219,7 +219,7 @@ onUnmounted(() => {
 <template>
   <main :style="mainStyle">
     <ProgressBar v-if="activeTabState?.isLoading" mode="indeterminate" style="height: 3px; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000; border-radius: 0" />
-    <TabView :activeIndex="activeTabIndex" @update:activeIndex="onTabChange" class="code-tabs">
+    <TabView :activeIndex="activeTabIndex" @update:activeIndex="onTabChange" class="code-tabs" :class="{ 'single-tab': tabs.length === 1 }">
       <TabPanel v-for="tab in tabs" :key="tab.id">
         <template #header>
           <div class="tab-header">
@@ -370,6 +370,12 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+.code-tabs.single-tab .p-tabview-nav-container {
+  display: none !important;
+}
+.code-tabs.single-tab .p-tabview-panels {
+  height: 100% !important;
 }
 .code-tabs .p-tabview-panels {
   flex: 1;
