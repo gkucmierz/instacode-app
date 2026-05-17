@@ -5,6 +5,7 @@
 // Cmd/Ctrl + ,  -> Settings
 // Cmd/Ctrl + I  -> About
 // Cmd/Ctrl + S  -> Share Code
+// Cmd/Ctrl + G  -> Export to Gist
 // Cmd/Ctrl + N  -> New Tab
 // Cmd/Ctrl + W  -> Close Tab
 // ----------------------------------------------------
