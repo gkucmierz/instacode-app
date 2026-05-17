@@ -25,7 +25,8 @@ const DEFAULT_SETTINGS = {
       replacePattern: null,
       replaceWith: null
     }
-  ]
+  ],
+  githubToken: ''
 };
 
 const init = () => {

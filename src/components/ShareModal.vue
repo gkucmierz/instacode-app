@@ -20,6 +20,7 @@ const emit = defineEmits(['close']);
 const code = ref('');
 const isBundling = ref(false);
 const bundledCode = ref('');
+const errorMessage = ref('');
 
 const encode = (c) => {
   return codeService.codeToUrl(c);
@@ -31,12 +32,13 @@ const copy = () => {
 
 const generateBundle = async () => {
   isBundling.value = true;
+  errorMessage.value = '';
   try {
     const treeShake = settingsService.getItem('treeShake') || false;
     bundledCode.value = await bundleCode(code.value, treeShake);
   } catch (err) {
     console.error('Bundle failed', err);
-    alert('Bundle failed: ' + err.message);
+    errorMessage.value = 'Bundle failed: ' + err.message;
   } finally {
     isBundling.value = false;
   }
@@ -52,6 +54,7 @@ watch(() => props.visible, (visible) => {
   if (!visible) return;
   code.value = codeService.get();
   bundledCode.value = '';
+  errorMessage.value = '';
 });
 </script>
 
@@ -75,6 +78,9 @@ watch(() => props.visible, (visible) => {
             @click="generateBundle()" 
             :loading="isBundling" 
           />
+          <div v-if="errorMessage" style="color: #f87171; margin-top: 1rem; font-size: 0.9em; text-align: center;">
+            <i class="pi pi-exclamation-triangle" style="margin-right: 4px;"></i> {{ errorMessage }}
+          </div>
           <div v-else>
             <textarea class="bundle-preview" readonly :value="bundledCode"></textarea>
             <PrimeButton 

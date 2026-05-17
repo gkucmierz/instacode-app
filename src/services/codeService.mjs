@@ -100,6 +100,14 @@ const codeService = {
       }
     }
   },
+  renameTab(id, newTitle) {
+    const tab = this.getTab(id);
+    if (tab && newTitle && newTitle.trim() !== '') {
+      tab.title = newTitle.trim();
+      localStorage.setItem(STORAGE_KEY_TABS, JSON.stringify(tabs));
+      ee.emit('tabs-changed');
+    }
+  },
   restoreTab() {
     if (closedTabs.length > 0) {
       const restoredTab = closedTabs.pop();

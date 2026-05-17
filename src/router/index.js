@@ -39,7 +39,9 @@ const router = createRouter({
       name: 'gist',
       beforeEnter: async (to, from, next) => {
         try {
-          const res = await fetch(`https://api.github.com/gists/${to.params.id}`);
+          const res = await fetch(`https://api.github.com/gists/${to.params.id}?t=${Date.now()}`, {
+            headers: { 'Cache-Control': 'no-cache' }
+          });
           if (res.ok) {
             const data = await res.json();
             const files = Object.values(data.files || {});

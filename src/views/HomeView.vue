@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
+import GistExportModal from '../components/GistExportModal.vue';
 import settingsService from '../services/settingsService';
 import codeService from '../services/codeService';
 
@@ -17,6 +19,7 @@ import { setSafeInterval } from '@gkucmierz/utils';
 
 const tabs = ref(codeService.getTabs());
 const activeTabIndex = ref(tabs.value.findIndex(t => t.id === codeService.getActiveTabId()));
+const router = useRouter();
 
 const updateTabs = () => {
   tabs.value = [...codeService.getTabs()];
@@ -55,6 +58,44 @@ const handleKeydown = (e) => {
     e.preventDefault();
     codeService.restoreTab();
   }
+
+  // Cmd+G (Export Gist)
+  if (cmdCtrl && e.keyCode === 71 && !e.shiftKey) {
+    e.preventDefault();
+    openGistModal();
+  }
+};
+
+const isGistModalVisible = ref(false);
+
+const openGistModal = () => {
+  isGistModalVisible.value = true;
+};
+
+const editingTabId = ref(null);
+const editTabTitle = ref('');
+
+const startEditTab = (tab) => {
+  editingTabId.value = tab.id;
+  editTabTitle.value = tab.title;
+  setTimeout(() => {
+    const input = document.querySelector('.tab-edit-input');
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 0);
+};
+
+const saveEditTab = (tabId) => {
+  if (editingTabId.value === tabId) {
+    codeService.renameTab(tabId, editTabTitle.value);
+    editingTabId.value = null;
+  }
+};
+
+const cancelEditTab = () => {
+  editingTabId.value = null;
 };
 
 const tabStates = ref({});
@@ -179,9 +220,12 @@ const run = ({ tabId, code }) => {
     state.result += error.message;
   };
 
+  const safeSettings = JSON.parse(JSON.stringify(settingsService.get()));
+  delete safeSettings.githubToken;
+
   state.worker.postMessage({
     code,
-    settings: JSON.parse(JSON.stringify(settingsService.get())),
+    settings: safeSettings,
   });
 
   state.pingInterval = setSafeInterval(() => {
@@ -224,7 +268,8 @@ onUnmounted(() => {
         <template #header>
           <div class="tab-header">
             <div class="status-dot-mini" :class="getTabState(tab.id).workerStatus" :title="getTabState(tab.id).workerStatus"></div>
-            <span>{{ tab.title }}</span>
+            <span v-if="editingTabId !== tab.id" @dblclick="startEditTab(tab)" class="tab-title-text">{{ tab.title }}</span>
+            <input v-else type="text" v-model="editTabTitle" @blur="saveEditTab(tab.id)" @keyup.enter="saveEditTab(tab.id)" @keyup.esc="cancelEditTab()" class="tab-edit-input" />
             <i class="pi pi-times close-icon" @click.stop="codeService.closeTab(tab.id)" v-if="tabs.length > 1"></i>
           </div>
         </template>
@@ -245,6 +290,13 @@ onUnmounted(() => {
       <div class="status-dot" :class="activeTabState.workerStatus"></div>
       <span>{{ statusText }}</span>
     </div>
+
+    <GistExportModal 
+      :visible="isGistModalVisible" 
+      :tabTitle="tabs[activeTabIndex]?.title"
+      :tabCode="tabs[activeTabIndex]?.code"
+      @close="isGistModalVisible = false"
+    />
   </main>
 </template>
 
@@ -311,12 +363,24 @@ main {
   gap: 8px;
 }
 
-.tab-header span {
+.tab-header span.tab-title-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 160px;
   display: inline-block;
+  user-select: none;
+}
+
+.tab-edit-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--tab-border);
+  color: var(--tab-active-text);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 0.85rem;
+  width: 120px;
+  outline: none;
 }
 
 .status-dot-mini {

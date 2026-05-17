@@ -3,6 +3,7 @@ import { ref, reactive, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import InputSwitch from 'primevue/inputswitch';
 import PrimeButton from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import Dropdown from 'primevue/dropdown';
@@ -39,7 +40,8 @@ const DEFAULT_SETTINGS = {
       replacePattern: null,
       replaceWith: null
     }
-  ]
+  ],
+  githubToken: ''
 };
 
 const THEMES = [
@@ -160,7 +162,17 @@ const handleClearCache = async () => {
   }
 };
 
-const jsonText = ref(JSON.stringify(so, null, 2));
+const showToken = ref(false);
+
+const getDisplayJson = () => {
+  const displayObj = { ...so };
+  if (!showToken.value && displayObj.githubToken) {
+    displayObj.githubToken = '*'.repeat(displayObj.githubToken.length);
+  }
+  return JSON.stringify(displayObj, null, 2);
+};
+
+const jsonText = ref(getDisplayJson());
 
 const extensions = computed(() => {
   const currentTheme = themesMap[so.theme] || oneDark;
@@ -172,8 +184,13 @@ const onEditorChange = (value) => {
   try {
     const parsed = JSON.parse(value);
     Object.keys(DEFAULT_SETTINGS).forEach(key => {
-      if (parsed[key] !== undefined && parsed[key] !== so[key]) {
-        so[key] = parsed[key];
+      if (parsed[key] !== undefined) {
+        if (key === 'githubToken' && !showToken.value && parsed[key] === '*'.repeat((so.githubToken || '').length)) {
+          return; // Ignore mask
+        }
+        if (parsed[key] !== so[key]) {
+          so[key] = parsed[key];
+        }
       }
     });
   } catch (e) {
@@ -185,13 +202,17 @@ watch(
   so,
   (val) => {
     settingsService.set(val);
-    const newStr = JSON.stringify(val, null, 2);
+    const newStr = getDisplayJson();
     if (jsonText.value !== newStr) {
       jsonText.value = newStr;
     }
   },
   { deep: true }
 );
+
+watch(showToken, () => {
+  jsonText.value = getDisplayJson();
+});
 
 onMounted(() => {
   window.addEventListener('keydown', escDown);
@@ -234,6 +255,25 @@ onUnmounted(() => {
                 optionValue="value" 
                 style="flex: 1"
               />
+            </p>
+
+            <p class="item" style="display: flex; align-items: center;">
+              <label for="githubToken" style="margin-left: 0; margin-right: 12px; width: 150px">GitHub Token (Gists)</label>
+              <div style="display: flex; flex: 1; gap: 8px;">
+                <InputText 
+                  id="githubToken" 
+                  :type="showToken ? 'text' : 'password'" 
+                  v-model="so.githubToken" 
+                  placeholder="ghp_..."
+                  style="flex: 1"
+                />
+                <PrimeButton 
+                  :icon="showToken ? 'pi pi-eye-slash' : 'pi pi-eye'" 
+                  class="p-button-secondary p-button-outlined"
+                  @click="showToken = !showToken"
+                  title="Toggle token visibility"
+                />
+              </div>
             </p>
           </div>
 

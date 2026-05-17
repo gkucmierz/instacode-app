@@ -11,6 +11,7 @@
 - 🔄 **Smart `require` Hoisting & Linting:** Instacode bridges the gap between CommonJS and ES Modules by intelligently analyzing CommonJS `require()` calls and hoisting them into native ESM `import` statements at the top of the generated bundle. A custom linter actively suggests locking unstable dependency versions.
 - ⚡️ **Real-Time Log Streaming:** Forget waiting for a 100% CPU task to finish before seeing the output. Our custom IPC stream with `console.flush()` pushes your logs to the UI instantly, line by line.
 - 🗂️ **Multi-Tab Workspace:** Effortlessly manage multiple concurrent scripts with a robust multi-tab interface, fully controllable via keyboard shortcuts (`Cmd+N`, `Cmd+W`, `Cmd+[1-9]`).
+- 🐙 **Direct GitHub Gist Export:** Instantly export your code as a Secret or Public GitHub Gist via a beautifully integrated UI (`Cmd+G`). Instacode securely manages your Personal Access Token, handles API interactions gracefully (even with bad credentials), and automatically generates deep-links for immediate code evaluation directly from the Gist description.
 
 ## 🧠 How it works (Under the Hood)
 
