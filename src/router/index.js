@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import SettingsView from '../views/SettingsView.vue';
-
+import settingsService from '../services/settingsService.mjs';
 
 import codeService from '../services/codeService';
 import { SHARE_CODE_ROUTE_NAME } from '../app.config';
@@ -39,9 +39,14 @@ const router = createRouter({
       name: 'gist',
       beforeEnter: async (to, from, next) => {
         try {
-          const res = await fetch(`https://api.github.com/gists/${to.params.id}?t=${Date.now()}`, {
-            headers: { 'Cache-Control': 'no-cache' }
-          });
+          const headers = { 'Cache-Control': 'no-cache' };
+          const token = settingsService.getItem('githubToken');
+          if (token) {
+            headers['Authorization'] = `token ${token}`;
+          }
+
+          const res = await fetch(`https://api.github.com/gists/${to.params.id}?t=${Date.now()}`, { headers });
+          
           if (res.ok) {
             const data = await res.json();
             const files = Object.values(data.files || {});
@@ -49,12 +54,31 @@ const router = createRouter({
             if (jsFile && jsFile.content) {
               codeService.newTab(jsFile.content, jsFile.filename);
             }
+          } else {
+            const errorMsg = `// ERROR: Failed to load Gist (${res.status})\n// Make sure you haven't exceeded GitHub's rate limit.`;
+            codeService.newTab(errorMsg, 'Error');
           }
         } catch (e) {
           console.error('[Router] Failed to load gist:', e);
         }
         next({ name: 'home' });
       }
+    },
+    {
+      path: '/run/gist/:user/:id',
+      redirect: to => {
+        return { name: 'gist', params: { id: to.params.id } }
+      }
+    },
+    {
+      path: '/run/gist/:id',
+      redirect: to => {
+        return { name: 'gist', params: { id: to.params.id } }
+      }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })

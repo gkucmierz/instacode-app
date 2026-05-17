@@ -39,4 +39,34 @@ test.describe('Instacode Gist Export', () => {
     await expect(tokenPrompt).toBeVisible();
   });
 
+  test('should load gist from URL and create a new tab', async ({ page }) => {
+    // Mock the GitHub Gist API response
+    await page.route('https://api.github.com/gists/test_gist_id*', async route => {
+      const json = {
+        files: {
+          "mock_script.js": {
+            filename: "mock_script.js",
+            language: "JavaScript",
+            content: "console.log('hello from mock gist');"
+          }
+        }
+      };
+      await route.fulfill({ json });
+    });
+
+    // Navigate to the gist URL
+    await page.goto('/gist/test_gist_id');
+
+    // It should automatically redirect to home (/)
+    await page.waitForURL('**/');
+
+    // A new tab should be created with the filename 'mock_script.js'
+    const newTab = page.locator('.p-tabview-nav-link', { hasText: 'mock_script.js' });
+    await expect(newTab).toBeVisible({ timeout: 5000 });
+
+    // The editor should contain the content
+    const activeEditor = page.locator('.cm-content');
+    await expect(activeEditor).toContainText("console.log('hello from mock gist');");
+  });
+
 });
