@@ -171,7 +171,7 @@ addEventListener('message', async ({ data }) => {
         if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {
           if (!moduleRegistry[name]) {
             try {
-              moduleRegistry[name] = await import(name);
+              moduleRegistry[name] = await import(/* @vite-ignore */ name);
             } catch (err) {
               console.error(`Failed to load URL module ${name}`, err);
               throw err;
