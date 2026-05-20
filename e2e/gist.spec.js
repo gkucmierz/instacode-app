@@ -65,7 +65,7 @@ test.describe('Instacode Gist Export', () => {
     await expect(newTab).toBeVisible({ timeout: 5000 });
 
     // The editor should contain the content
-    const activeEditor = page.locator('.code-tabs .p-tabview-panel:visible .cm-content');
+    const activeEditor = page.locator('.code-tabs .p-tabview-panel:visible .left-pane .cm-content');
     await expect(activeEditor).toContainText("console.log('hello from mock gist');");
   });
   test('should successfully export a gist and link the tab, isolating the link across tabs', async ({ page }) => {
