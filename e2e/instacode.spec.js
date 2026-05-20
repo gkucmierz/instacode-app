@@ -7,7 +7,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await page.goto('/');
 
     // In Zen Mode (1 tab), the tab header container is hidden, but the tab exists
-    const tabHeaderContainer = page.locator('.p-tabview-nav-container');
+    const tabHeaderContainer = page.locator('.code-tabs .p-tabview-nav-container');
     await expect(tabHeaderContainer).toBeHidden();
 
     // Wait for the worker to evaluate and the result pane to display output
@@ -20,7 +20,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
     await page.goto('/');
     
-    const tabContainer = page.locator('.p-tabview-nav-container');
+    const tabContainer = page.locator('.code-tabs .p-tabview-nav-container');
     
     // Initial state: 1 tab -> Zen mode (hidden)
     await expect(tabContainer).toBeHidden();
@@ -30,7 +30,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     
     // 2 tabs -> Zen mode off (visible)
     await expect(tabContainer).toBeVisible();
-    const tabs = page.locator('.p-tabview-nav-link');
+    const tabs = page.locator('.code-tabs .p-tabview-nav-link');
     await expect(tabs).toHaveCount(2);
     
     // Press Cmd+W to close the second tab
@@ -52,11 +52,11 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await page.keyboard.press(`${modifier}+N`);
 
     // We should now have two tabs
-    const tabs = page.locator('.p-tabview-nav-link');
+    const tabs = page.locator('.code-tabs .p-tabview-nav-link');
     await expect(tabs).toHaveCount(2);
     
     // The active tab should be Script 2
-    const activeTab = page.locator('.p-tabview-nav-link[aria-selected="true"]');
+    const activeTab = page.locator('.code-tabs .p-tabview-nav-link[aria-selected="true"]');
     await expect(activeTab).toContainText('Script 2');
 
     // Press Cmd+W to close the active tab

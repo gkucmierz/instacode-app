@@ -61,11 +61,11 @@ test.describe('Instacode Gist Export', () => {
     await page.waitForURL('**/');
 
     // A new tab should be created with the filename 'mock_script.js'
-    const newTab = page.locator('.p-tabview-nav-link', { hasText: 'mock_script.js' });
+    const newTab = page.locator('.code-tabs .p-tabview-nav-link', { hasText: 'mock_script.js' });
     await expect(newTab).toBeVisible({ timeout: 5000 });
 
     // The editor should contain the content
-    const activeEditor = page.locator('.cm-content');
+    const activeEditor = page.locator('.cm-content').first();
     await expect(activeEditor).toContainText("console.log('hello from mock gist');");
   });
   test('should successfully export a gist and link the tab, isolating the link across tabs', async ({ page }) => {
@@ -108,7 +108,15 @@ test.describe('Instacode Gist Export', () => {
     // Check if the success message appears
     await expect(modal.locator('text=Success! Gist created successfully')).toBeVisible();
     
-    // Verify that the "Update Gist" button is now visible immediately
+    // Close modal (success screen is showing)
+    await modal.locator('button:has-text("Close")').click();
+    await expect(modal).toBeHidden();
+    
+    // Reopen Gist Modal to verify the linked state (main tab view is now restored)
+    await page.keyboard.press(`${modifier}+g`);
+    await expect(modal).toBeVisible();
+
+    // Verify that the "Update Gist" button is now visible
     const updateBtn = modal.locator('button:has-text("Update Gist")');
     await expect(updateBtn).toBeVisible();
     
@@ -118,14 +126,14 @@ test.describe('Instacode Gist Export', () => {
     await expect(modal.locator('code', { hasText: 'mock_new_gist_12' })).toBeVisible();
     
     // Close modal
-    await modal.locator('button:has-text("Close")').click();
+    await modal.locator('button:has-text("Cancel")').click();
     await expect(modal).toBeHidden();
     
     // Create a new tab (Cmd+N / Ctrl+N)
     await page.keyboard.press(`${modifier}+n`);
     
     // Wait for a new tab to be active (Script 2)
-    const newTab = page.locator('a.p-tabview-nav-link >> text="Script 2"');
+    const newTab = page.locator('.code-tabs a.p-tabview-nav-link >> text="Script 2"');
     await expect(newTab).toBeVisible();
     
     // Open Gist Modal again
@@ -141,7 +149,7 @@ test.describe('Instacode Gist Export', () => {
     await expect(modal).toBeHidden();
     
     // Click back to Script 1 tab
-    const firstTab = page.locator('a.p-tabview-nav-link >> text="Script 1"');
+    const firstTab = page.locator('.code-tabs a.p-tabview-nav-link >> text="Script 1"');
     await firstTab.click();
     
     // Open Gist Modal again

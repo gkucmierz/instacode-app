@@ -30,15 +30,15 @@ test.describe('Instacode Smart JSON Formatter E2E Tests', () => {
     await openJsonBtn.click();
 
     // Verify a new tab was created (Zen Mode should toggle off, so tab bar is visible)
-    const tabContainer = page.locator('.p-tabview-nav-container');
+    const tabContainer = page.locator('.code-tabs .p-tabview-nav-container');
     await expect(tabContainer).toBeVisible();
     
     // Verify there are now 2 tabs
-    const tabs = page.locator('.p-tabview-nav-link');
+    const tabs = page.locator('.code-tabs .p-tabview-nav-link');
     await expect(tabs).toHaveCount(2);
 
     // Verify the new active tab has the title "output.json"
-    const activeTabTitle = page.locator('.p-tabview-nav-link[aria-selected="true"] .tab-title-text');
+    const activeTabTitle = page.locator('.code-tabs .p-tabview-nav-link[aria-selected="true"] .tab-title-text');
     await expect(activeTabTitle).toContainText('output.json');
 
     // Verify the code editor in the new tab contains the properly formatted JSON
