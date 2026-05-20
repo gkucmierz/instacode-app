@@ -126,7 +126,7 @@ test.describe('Instacode Gist Export', () => {
     await expect(modal.locator('code', { hasText: 'mock_new_gist_12' })).toBeVisible();
     
     // Close modal
-    await modal.locator('button:has-text("Cancel")').click();
+    await modal.locator('button:has-text("Cancel")').first().click();
     await expect(modal).toBeHidden();
     
     // Create a new tab (Cmd+N / Ctrl+N)
@@ -145,7 +145,7 @@ test.describe('Instacode Gist Export', () => {
     await expect(updateBtn).toBeHidden();
     
     // Close modal
-    await modal.locator('button:has-text("Cancel")').click();
+    await modal.locator('button:has-text("Cancel")').first().click();
     await expect(modal).toBeHidden();
     
     // Click back to Script 1 tab
