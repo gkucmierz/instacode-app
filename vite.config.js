@@ -139,6 +139,14 @@ export default defineConfig({
     port: 5026,
     strictPort: true,
   },
+  test: {
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/e2e/**',
+      '**/.{idea,git,cache,output,temp}/**'
+    ]
+  },
   build: {
     target: 'esnext',
     cssTarget: 'chrome100',

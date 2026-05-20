@@ -33,8 +33,10 @@ describe('parser.mjs', () => {
         const uuid = require('uuid'); /* @2.0.0 */
       `;
       const deps = extractDependencies(code);
-      expect(deps).toContainEqual({ name: 'lodash', version: '1.0.0' });
-      expect(deps).toContainEqual({ name: 'uuid', version: '2.0.0' });
+      expect(deps).toMatchObject([
+        { name: 'lodash', version: '1.0.0' },
+        { name: 'uuid', version: '2.0.0' }
+      ]);
     });
   });
 
