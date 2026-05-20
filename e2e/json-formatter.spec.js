@@ -7,7 +7,7 @@ test.describe('Instacode Smart JSON Formatter E2E Tests', () => {
     await page.goto('/');
     
     // Clear the editor completely
-    await page.locator('.cm-content').first().click();
+    await page.locator('.code-tabs .p-tabpanel:visible .cm-content').click();
     const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
     await page.keyboard.press(`${modifier}+A`);
     await page.keyboard.press('Backspace');
@@ -43,7 +43,7 @@ test.describe('Instacode Smart JSON Formatter E2E Tests', () => {
 
     // Verify the code editor in the new tab contains the properly formatted JSON
     // with double quotes around keys and string values
-    const editorContent = page.locator('.cm-content').first();
+    const editorContent = page.locator('.code-tabs .p-tabpanel:visible .cm-content');
     await expect(editorContent).toContainText('"pick": "Wukong"');
     await expect(editorContent).toContainText('"ban": ""');
   });
