@@ -72,7 +72,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await page.goto('/');
     
     // Modify the text to set a custom string
-    await page.locator('.code-tabs .p-tabpanel:visible .cm-content').click();
+    await page.locator('.code-tabs .p-tabview-panel:visible .cm-content').click();
     await page.keyboard.press(`${modifier}+A`); // Select all
     await page.keyboard.press('Backspace'); // Clear it
     
@@ -92,7 +92,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await page.goBack();
     
     // Ensure the state persisted in the editor
-    await expect(page.locator('.code-tabs .p-tabpanel:visible .cm-content')).toContainText('PERSISTENCE_TEST');
+    await expect(page.locator('.code-tabs .p-tabview-panel:visible .cm-content')).toContainText('PERSISTENCE_TEST');
     
     // Ensure the result persisted
     await expect(resultPane).toContainText('PERSISTENCE_TEST');
@@ -103,12 +103,12 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await page.goto('/');
     
     // Clear the editor completely
-    await page.locator('.code-tabs .p-tabpanel:visible .cm-content').click();
+    await page.locator('.code-tabs .p-tabview-panel:visible .cm-content').click();
     await page.keyboard.press(`${modifier}+A`);
     await page.keyboard.press('Backspace');
 
     // Make sure it's actually cleared by waiting for a line to not have old text
-    await expect(page.locator('.code-tabs .p-tabpanel:visible .cm-content')).not.toContainText('Hello World!');
+    await expect(page.locator('.code-tabs .p-tabview-panel:visible .cm-content')).not.toContainText('Hello World!');
 
     // Reload the browser
     await page.reload();
