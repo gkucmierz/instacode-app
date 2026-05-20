@@ -68,11 +68,12 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
   });
 
   test('should preserve worker state and text when navigating to settings and back', async ({ page }) => {
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
     await page.goto('/');
     
     // Modify the text to set a custom string
     await page.locator('.cm-content').first().click();
-    await page.keyboard.press('Meta+A'); // Select all
+    await page.keyboard.press(`${modifier}+A`); // Select all
     await page.keyboard.press('Backspace'); // Clear it
     
     await page.keyboard.insertText('console.log("PERSISTENCE_TEST")');
@@ -82,7 +83,7 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
     await expect(resultPane).toContainText('PERSISTENCE_TEST', { timeout: 10000 });
 
     // Go to Settings via shortcut Cmd+,
-    await page.keyboard.press('Meta+,');
+    await page.keyboard.press(`${modifier}+,`);
     
     // Ensure we are in settings (check URL or title)
     await expect(page).toHaveURL(/.*\/settings/);
@@ -98,11 +99,12 @@ test.describe('Instacode Multi-Tab E2E Tests', () => {
   });
 
   test('should restore welcome code if the last tab is completely cleared and browser refreshed', async ({ page }) => {
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
     await page.goto('/');
     
     // Clear the editor completely
     await page.locator('.cm-content').first().click();
-    await page.keyboard.press('Meta+A');
+    await page.keyboard.press(`${modifier}+A`);
     await page.keyboard.press('Backspace');
 
     // Make sure it's actually cleared by waiting for a line to not have old text
