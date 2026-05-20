@@ -1,4 +1,6 @@
 
+/* eslint-disable no-undef */
+
 // ----------------------------------------------------
 // Shortcuts:
 // Cmd/Ctrl + H  -> Help

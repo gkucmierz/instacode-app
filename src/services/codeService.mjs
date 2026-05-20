@@ -72,10 +72,10 @@ const codeService = {
       ee.emit('tabs-changed');
     }
   },
-  newTab(code = '', customTitle = null) {
+  newTab(code = '', customTitle = null, gistId = null) {
     const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
     const title = customTitle || `Script ${tabs.length + 1}`;
-    tabs.push({ id, title, code });
+    tabs.push({ id, title, code, gistId });
     localStorage.setItem(STORAGE_KEY_TABS, JSON.stringify(tabs));
     ee.emit('tabs-changed');
     this.setActiveTab(id);
@@ -106,6 +106,13 @@ const codeService = {
       tab.title = newTitle.trim();
       localStorage.setItem(STORAGE_KEY_TABS, JSON.stringify(tabs));
       ee.emit('tabs-changed');
+    }
+  },
+  setGistId(id, gistId) {
+    const tab = this.getTab(id);
+    if (tab) {
+      tab.gistId = gistId;
+      localStorage.setItem(STORAGE_KEY_TABS, JSON.stringify(tabs));
     }
   },
   restoreTab() {

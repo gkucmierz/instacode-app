@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, shallowRef, computed } from 'vue';
+import { watch, shallowRef, computed } from 'vue';
 import { Codemirror } from 'vue-codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
 import * as allThemes from '@uiw/codemirror-themes-all';
@@ -48,6 +48,17 @@ const parsedJson = computed(() => {
         return JSON.stringify(objs, null, 2);
       }
     } catch (e2) {
+      // Ignored: Not a valid JSON Lines (JSONL) format, proceed to fallback
+    }
+    
+    // Fallback: JS object syntax from javascript-stringify
+    try {
+      // Evaluate string as a JS expression (safe here since it's just the stringified output of user's own code)
+      const obj = new Function('return ' + trimmed)();
+      if (obj && typeof obj === 'object') {
+        return JSON.stringify(obj, null, 2);
+      }
+    } catch (e3) {
       return null;
     }
   }

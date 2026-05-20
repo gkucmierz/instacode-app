@@ -1,15 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import HelpModal from './components/HelpModal.vue';
 import ShareModal from './components/ShareModal.vue';
 import AboutModal from './components/AboutModal.vue';
 import PwaReloadPrompt from './components/PwaReloadPrompt.vue';
+import settingsService from './services/settingsService';
 
 const showHelp = ref(false);
 const showShare = ref(false);
 const showAbout = ref(false);
 const router = useRouter();
+
+const settings = settingsService.get();
+
+watch(() => settings.uiDensity, (newDensity) => {
+  document.documentElement.dataset.uiDensity = newDensity || 'compact';
+}, { immediate: true });
 
 const handleKeydown = (e) => {
   if (!e) e = window.event;

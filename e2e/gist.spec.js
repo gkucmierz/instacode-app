@@ -68,5 +68,89 @@ test.describe('Instacode Gist Export', () => {
     const activeEditor = page.locator('.cm-content');
     await expect(activeEditor).toContainText("console.log('hello from mock gist');");
   });
+  test('should successfully export a gist and link the tab, isolating the link across tabs', async ({ page }) => {
+    // Navigate to app
+    await page.goto('/');
+
+    // Setup network mock for POST /gists
+    await page.route('https://api.github.com/gists', async route => {
+      if (route.request().method() === 'POST') {
+        const json = {
+          id: 'mock_new_gist_1234567890abcdef',
+          html_url: 'https://gist.github.com/mock_new_gist_1234567890abcdef',
+        };
+        await route.fulfill({ json, status: 201 });
+      } else {
+        await route.continue();
+      }
+    });
+    
+    // Setup network mock for PATCH /gists/mock_new_gist_1234567890abcdef
+    await page.route('https://api.github.com/gists/mock_new_gist_1234567890abcdef', async route => {
+      await route.fulfill({ status: 200, json: {} });
+    });
+
+    // Press Cmd+G / Ctrl+G to open Gist Modal
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+    await page.keyboard.press(`${modifier}+g`);
+    
+    const modal = page.locator('.gist-modal');
+    await expect(modal).toBeVisible();
+
+    // Fill in a fake token to pass validation
+    const tokenInput = modal.locator('input[placeholder="ghp_..."]');
+    await tokenInput.fill('fake_token_for_testing_123');
+    
+    // Click Export
+    const exportBtn = modal.locator('button:has-text("Export to Gist")');
+    await exportBtn.click();
+    
+    // Check if the success message appears
+    await expect(modal.locator('text=Success! Gist created successfully')).toBeVisible();
+    
+    // Verify that the "Update Gist" button is now visible immediately
+    const updateBtn = modal.locator('button:has-text("Update Gist")');
+    await expect(updateBtn).toBeVisible();
+    
+    // Verify the visual indicator is present
+    const linkedBanner = modal.locator('text=Linked to GitHub Gist:');
+    await expect(linkedBanner).toBeVisible();
+    await expect(modal.locator('code', { hasText: 'mock_new_gist_12' })).toBeVisible();
+    
+    // Close modal
+    await modal.locator('button:has-text("Close")').click();
+    await expect(modal).toBeHidden();
+    
+    // Create a new tab (Cmd+N / Ctrl+N)
+    await page.keyboard.press(`${modifier}+n`);
+    
+    // Wait for a new tab to be active (Script 2)
+    const newTab = page.locator('a.p-tabview-nav-link >> text="Script 2"');
+    await expect(newTab).toBeVisible();
+    
+    // Open Gist Modal again
+    await page.keyboard.press(`${modifier}+g`);
+    await expect(modal).toBeVisible();
+    
+    // Verify banner is NOT visible in the new tab
+    await expect(linkedBanner).toBeHidden();
+    await expect(updateBtn).toBeHidden();
+    
+    // Close modal
+    await modal.locator('button:has-text("Cancel")').click();
+    await expect(modal).toBeHidden();
+    
+    // Click back to Script 1 tab
+    const firstTab = page.locator('a.p-tabview-nav-link >> text="Script 1"');
+    await firstTab.click();
+    
+    // Open Gist Modal again
+    await page.keyboard.press(`${modifier}+g`);
+    await expect(modal).toBeVisible();
+    
+    // Verify banner IS visible again
+    await expect(linkedBanner).toBeVisible();
+    await expect(updateBtn).toBeVisible();
+  });
 
 });

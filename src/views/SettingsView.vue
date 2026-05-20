@@ -164,8 +164,33 @@ const handleClearCache = async () => {
 
 const showToken = ref(false);
 
+const KEY_ORDER = [
+  'autoScroll',
+  'autoPrint',
+  'treeShake',
+  'theme',
+  'uiDensity',
+  'githubToken',
+  'cdns'
+];
+
 const getDisplayJson = () => {
-  const displayObj = { ...so };
+  const displayObj = {};
+  
+  // Enforce specific order matching the UI layout
+  KEY_ORDER.forEach(key => {
+    if (so[key] !== undefined) {
+      displayObj[key] = so[key];
+    }
+  });
+  
+  // Append any other keys that might not be in the order list
+  Object.keys(so).forEach(key => {
+    if (displayObj[key] === undefined) {
+      displayObj[key] = so[key];
+    }
+  });
+
   if (!showToken.value && displayObj.githubToken) {
     displayObj.githubToken = '*'.repeat(displayObj.githubToken.length);
   }
@@ -257,7 +282,19 @@ onUnmounted(() => {
               />
             </p>
 
-            <p class="item" style="display: flex; align-items: center;">
+            <p class="item">
+              <label for="uiDensity" style="margin-left: 0; margin-right: 12px; width: 150px">UI Density (Tabs)</label>
+              <Dropdown 
+                id="uiDensity" 
+                v-model="so.uiDensity" 
+                :options="[{label: 'Compact', value: 'compact'}, {label: 'Comfortable', value: 'comfortable'}]" 
+                optionLabel="label" 
+                optionValue="value"
+                style="flex: 1"
+              />
+            </p>
+
+            <div class="item" style="display: flex; align-items: center;">
               <label for="githubToken" style="margin-left: 0; margin-right: 12px; width: 150px">GitHub Token (Gists)</label>
               <div style="display: flex; flex: 1; gap: 8px;">
                 <InputText 
@@ -274,7 +311,14 @@ onUnmounted(() => {
                   title="Toggle token visibility"
                 />
               </div>
-            </p>
+            </div>
+
+            <div class="item" style="display: flex; align-items: center;">
+              <label style="margin-left: 0; margin-right: 12px; width: 150px">NPM CDNs</label>
+              <div style="flex: 1; font-size: 0.85em; opacity: 0.5; display: flex; align-items: center; gap: 6px;">
+                <i class="pi pi-code"></i> Advanced (Edit in JSON &rarr;)
+              </div>
+            </div>
           </div>
 
           <div class="json-editor">
@@ -353,11 +397,6 @@ onUnmounted(() => {
       flex: 1;
       padding: 24px;
       overflow: auto;
-    }
-
-    .p-tabview-nav-link {
-      padding: 0.5rem 1rem !important; /* Smaller height, matching HomeView roughly */
-      font-size: 0.85rem;
     }
   }
 

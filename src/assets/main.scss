@@ -92,6 +92,19 @@ select:focus,
   transition: border-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
+/* UI Density Settings */
+:root, :root[data-ui-density="compact"] {
+  --tab-nav-height: 34px;
+  --tab-nav-padding: 0 0.8rem;
+  --tab-nav-font-size: 0.85rem;
+}
+
+:root[data-ui-density="comfortable"] {
+  --tab-nav-height: 48px;
+  --tab-nav-padding: 0 1.25rem;
+  --tab-nav-font-size: 0.95rem;
+}
+
 /* Fix NanoUI Ripple Overflow on PrimeVue components */
 .p-button,
 .p-tabmenuitem .p-menuitem-link,
@@ -109,3 +122,16 @@ select:focus,
   background: #3f4b5b !important;
 }
 
+/* Apply UI Density to TabView */
+.p-tabview .p-tabview-nav-link {
+  height: var(--tab-nav-height) !important;
+  padding: var(--tab-nav-padding) !important;
+  font-size: var(--tab-nav-font-size) !important;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.p-tabview .p-tabview-nav-link .pi {
+  font-size: 0.9em;
+}

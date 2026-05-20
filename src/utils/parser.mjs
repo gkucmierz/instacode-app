@@ -1,4 +1,4 @@
-import { parseScript, parse } from 'meriyah';
+import { parse } from 'meriyah';
 
 const VERSION_REGEX = /(?:v|@)(\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9.]+)?)/i;
 

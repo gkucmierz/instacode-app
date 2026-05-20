@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
 
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
@@ -19,7 +18,6 @@ import { setSafeInterval } from '@gkucmierz/utils';
 
 const tabs = ref(codeService.getTabs());
 const activeTabIndex = ref(tabs.value.findIndex(t => t.id === codeService.getActiveTabId()));
-const router = useRouter();
 
 const updateTabs = () => {
   tabs.value = [...codeService.getTabs()];
@@ -99,6 +97,10 @@ const cancelEditTab = () => {
 };
 
 const tabStates = ref({});
+
+const handleOpenJsonTab = (jsonString) => {
+  codeService.newTab(jsonString, 'output.json');
+};
 
 const initTabStates = () => {
   tabs.value.forEach(tab => {
@@ -279,7 +281,11 @@ onUnmounted(() => {
               <CodeEditor :tabId="tab.id"/>
             </SplitterPanel>
             <SplitterPanel class="right-pane">
-              <ResultCode :data="getTabState(tab.id).result"/>
+              <ResultCode 
+                :data="getTabState(tab.id).result" 
+                :status="getTabState(tab.id).workerStatus"
+                @open-new-tab="handleOpenJsonTab"
+              />
             </SplitterPanel>
           </Splitter>
         </div>
@@ -478,8 +484,6 @@ main {
   border: none !important;
   border-bottom: 2px solid transparent !important;
   border-radius: 0 !important;
-  padding: 0.5rem 0.8rem !important; /* Smaller height */
-  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 .code-tabs .p-tabview-nav-link:hover {
