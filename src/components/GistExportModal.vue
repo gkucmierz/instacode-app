@@ -18,8 +18,8 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const filename = ref('');
-const isPublic = ref(false);
-const appendLink = ref(false);
+const isPublic = ref(settingsService.getItem('gistPublic') ?? false);
+const appendLink = ref(settingsService.getItem('gistAppendLink') ?? false);
 const isExporting = ref(false);
 const successUrl = ref('');
 const instacodeUrl = ref('');
@@ -45,11 +45,21 @@ watch(filename, (newVal) => {
   }
 });
 
+watch(isPublic, (newVal) => {
+  if (!linkedGistId.value) {
+    settingsService.setItem('gistPublic', newVal);
+  }
+});
+
+watch(appendLink, (newVal) => {
+  settingsService.setItem('gistAppendLink', newVal);
+});
+
 watch(() => props.visible, async (newVal) => {
   if (newVal) {
     filename.value = props.tabTitle?.endsWith('.js') ? props.tabTitle : `${props.tabTitle || 'Script'}.js`;
-    isPublic.value = false;
-    appendLink.value = false;
+    isPublic.value = settingsService.getItem('gistPublic') ?? false;
+    appendLink.value = settingsService.getItem('gistAppendLink') ?? false;
     isExporting.value = false;
     successUrl.value = '';
     instacodeUrl.value = '';

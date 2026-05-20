@@ -27,7 +27,9 @@ const DEFAULT_SETTINGS = {
       replaceWith: null
     }
   ],
-  githubToken: ''
+  githubToken: '',
+  gistPublic: false,
+  gistAppendLink: false
 };
 
 const init = () => {
