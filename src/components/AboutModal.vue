@@ -171,7 +171,12 @@ onBeforeUnmount(() => {
         <div class="about-container">
           <div class="content-col">
             <div class="header-row">
-              <h1>Instacode <span class="version">v{{ version }}</span></h1>
+              <h1>
+                Instacode
+                <a href="https://gitea.7u.pl/gkucmierz/instacode-app/src/branch/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer" class="version-link" title="View Changelog">
+                  <span class="version">v{{ version }}</span>
+                </a>
+              </h1>
             </div>
 
             <p class="description">
@@ -293,6 +298,17 @@ onBeforeUnmount(() => {
       align-items: center;
       gap: 12px;
 
+      .version-link {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: transform 0.15s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+
       .version {
         font-size: 0.4em;
         background: rgba(122, 206, 215, 0.2);
@@ -301,6 +317,7 @@ onBeforeUnmount(() => {
         border-radius: 12px;
         vertical-align: middle;
         font-family: monospace;
+        cursor: pointer;
       }
     }
   }
