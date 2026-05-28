@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.11] - 2026-05-28
+
+### Added
+- Global scrollbar auto-hide behavior (cross-platform OS X style) that only reveals scrollbars during active scrolling.
+
+## [1.3.10] - 2026-05-28
+
+### Fixed
+- Indeterminate blue loading progress bar getting stuck permanently by resetting the loading state when workers are terminated or encounter errors.
+- Memory leak and orphan background workers left active when closing editor tabs.
+
+### Added
+- Standard `<meta name="description">` tag to index.html to improve Google search snippet results.
+- Schema.org JSON-LD WebApplication structured data block in the head section to enable Rich Snippets.
+- `og:image` and `twitter:image` tags referencing the high-resolution 512x512 maskable app icon.
+
 ## [1.3.9] - 2026-05-28
 
 ### Added

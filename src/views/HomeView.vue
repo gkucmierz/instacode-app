@@ -20,7 +20,18 @@ const tabs = ref(codeService.getTabs());
 const activeTabIndex = ref(tabs.value.findIndex(t => t.id === codeService.getActiveTabId()));
 
 const updateTabs = () => {
+  const oldTabIds = new Set(tabs.value.map(t => t.id));
   tabs.value = [...codeService.getTabs()];
+  const newTabIds = new Set(tabs.value.map(t => t.id));
+
+  // Terminate and clean up any tab states that were removed
+  oldTabIds.forEach(id => {
+    if (!newTabIds.has(id)) {
+      terminate(id);
+      delete tabStates.value[id];
+    }
+  });
+
   const idx = tabs.value.findIndex(t => t.id === codeService.getActiveTabId());
   if (idx !== -1 && idx !== activeTabIndex.value) {
     activeTabIndex.value = idx;
@@ -187,6 +198,8 @@ const terminate = (tabId) => {
     state.pingInterval(); // Call the cancel function returned by setSafeInterval
     state.pingInterval = null;
   }
+  state.isLoading = false;
+  state.workerStatus = 'idle';
 };
 
 const run = ({ tabId, code }) => {
@@ -234,6 +247,8 @@ const run = ({ tabId, code }) => {
 
   state.worker.onerror = error => {
     state.result += error.message;
+    state.isLoading = false;
+    state.workerStatus = 'idle';
   };
 
   const safeSettings = JSON.parse(JSON.stringify(settingsService.get()));
