@@ -53,6 +53,9 @@ const saveToCache = async (key, data) => {
 };
 
 export const resolvePackage = async (name, version, treeShake = false, specifiers = [], cdns = []) => {
+  if (!name || !name.trim() || name === '@') {
+    throw new Error('Invalid package name');
+  }
   let actualVersion = version;
   if (!actualVersion || actualVersion === 'latest') {
     try {

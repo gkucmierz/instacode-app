@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - The full-width bright turquoise tab bar bottom border has been replaced with a subtle, theme-appropriate neutral border.
 - The thin loading progress bar under the title bar now only activates when the app is actually resolving and downloading packages/assets from external CDNs, rather than showing up on every code evaluation run.
+- A bug where empty or invalid imports (e.g. require("") or import "@") would trigger requests to CDNs and cache the esm.sh HTML homepage under the "@latest" key.
 
 ### Added
 - A build-time script `extract-themes.mjs` that dynamically extracts colors from CodeMirror packages (`@codemirror/theme-one-dark` and `@uiw/codemirror-themes-all`) to generate a static JSON color metadata file, avoiding runtime overhead and keeping the UI shell colors in sync with CodeMirror.
