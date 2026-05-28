@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
   autoPrint: true,
   treeShake: true,
   theme: 'oneDark',
+  uiDensity: 'compact',
   cdns: [
     {
       url: 'https://cdn.jsdelivr.net/npm/',
@@ -283,15 +284,19 @@ onUnmounted(() => {
             </p>
 
             <p class="item">
-              <label for="uiDensity" style="margin-left: 0; margin-right: 12px; width: 150px">UI Density (Tabs)</label>
-              <Dropdown 
-                id="uiDensity" 
-                v-model="so.uiDensity" 
-                :options="[{label: 'Compact', value: 'compact'}, {label: 'Comfortable', value: 'comfortable'}]" 
-                optionLabel="label" 
-                optionValue="value"
-                style="flex: 1"
-              />
+              <span style="margin-left: 0; margin-right: 12px; width: 150px">UI Density (Tabs)</span>
+              <span class="density-switch">
+                <button 
+                  type="button" 
+                  :class="{ active: so.uiDensity === 'compact' }" 
+                  @click="so.uiDensity = 'compact'"
+                >Compact</button>
+                <button 
+                  type="button" 
+                  :class="{ active: so.uiDensity === 'comfortable' }" 
+                  @click="so.uiDensity = 'comfortable'"
+                >Comfortable</button>
+              </span>
             </p>
 
             <div class="item" style="display: flex; align-items: center;">
@@ -428,6 +433,44 @@ onUnmounted(() => {
 
     label {
       margin-left: 12px;
+    }
+  }
+
+  .density-switch {
+    display: flex;
+    background: #161b22;
+    border-radius: 6px;
+    padding: 2px;
+    border: 1px solid #30363d;
+    height: 38px;
+    box-sizing: border-box;
+    flex: 1;
+
+    button {
+      background: transparent;
+      border: none;
+      color: #8b949e;
+      padding: 0 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+
+      &:hover {
+        color: #c9d1d9;
+      }
+
+      &.active {
+        background: #80bdff;
+        color: #161b22;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
     }
   }
 

@@ -62,6 +62,20 @@ const handleKeydown = (e) => {
     e.preventDefault();
     openGistModal();
   }
+
+  // Switch tabs: Cmd+Option+Arrows / Ctrl+Option+Arrows (Mac) or Ctrl+Alt+Arrows (Windows)
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
+  const isSwitchModifier = isMac ? ((e.metaKey && e.altKey) || (e.ctrlKey && e.altKey)) : (e.ctrlKey && e.altKey);
+
+  if (isSwitchModifier && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    const len = tabs.value.length;
+    if (len > 1) {
+      const direction = e.key === 'ArrowLeft' ? -1 : 1;
+      const nextIndex = (activeTabIndex.value + direction + len) % len;
+      onTabChange(nextIndex);
+    }
+  }
 };
 
 const isGistModalVisible = ref(false);

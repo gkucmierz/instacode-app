@@ -87,6 +87,19 @@ onMounted(() => {
           </li>
           <li>
             <div class="shortcut-keys">
+              <kbd v-if="isMac">⌘ Cmd</kbd><kbd v-else>Ctrl</kbd>
+              <span class="plus">+</span>
+              <kbd v-if="isMac">⌥ Option</kbd><kbd v-else>Alt</kbd>
+              <span class="plus">+</span>
+              <kbd>←</kbd> / <kbd>→</kbd>
+            </div>
+            <span class="desc">
+              &mdash; switch to previous / next tab
+              <span v-if="isMac" class="alt-key">(or <kbd>Ctrl</kbd> + <kbd>⌥ Option</kbd> + <kbd>←</kbd> / <kbd>→</kbd>)</span>
+            </span>
+          </li>
+          <li>
+            <div class="shortcut-keys">
               <kbd>ESC</kbd>
             </div>
             <span class="desc">&mdash; close window</span>
