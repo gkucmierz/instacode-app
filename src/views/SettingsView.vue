@@ -15,6 +15,7 @@ import * as allThemes from '@uiw/codemirror-themes-all';
 
 import settingsService from '../services/settingsService';
 import { getAllCachedPackages, removePackageFromCache, clearCache } from '../services/PackageManager';
+import themeColorsMap from '../assets/themes-metadata.json';
 
 const DEFAULT_SETTINGS = {
   autoScroll: false,
@@ -67,16 +68,7 @@ const themesMap = {
   eclipse: allThemes.eclipse
 };
 
-const themeColorsMap = {
-  oneDark: { bg: '#282c34', tabBg: '#21252b', activeTab: '#282c34', text: '#abb2bf', activeText: '#ffffff', border: '#56b6c2' },
-  dracula: { bg: '#282a36', tabBg: '#1e1f29', activeTab: '#282a36', text: '#6272a4', activeText: '#f8f8f2', border: '#bd93f9' },
-  githubDark: { bg: '#0d1117', tabBg: '#010409', activeTab: '#0d1117', text: '#8b949e', activeText: '#c9d1d9', border: '#f78166' },
-  githubLight: { bg: '#ffffff', tabBg: '#f6f8fa', activeTab: '#ffffff', text: '#57606a', activeText: '#24292f', border: '#0969da' },
-  nord: { bg: '#2e3440', tabBg: '#242933', activeTab: '#2e3440', text: '#d8dee9', activeText: '#eceff4', border: '#88c0d0' },
-  monokai: { bg: '#272822', tabBg: '#1e1f1c', activeTab: '#272822', text: '#75715e', activeText: '#f8f8f2', border: '#a6e22e' },
-  material: { bg: '#263238', tabBg: '#1e272c', activeTab: '#263238', text: '#546e7a', activeText: '#eeffff', border: '#80cbc4' },
-  eclipse: { bg: '#ffffff', tabBg: '#f0f0f0', activeTab: '#ffffff', text: '#7f7f7f', activeText: '#000000', border: '#0000ff' }
-};
+
 
 const currentUiTheme = computed(() => themeColorsMap[so.theme] || themeColorsMap.oneDark);
 
@@ -87,7 +79,8 @@ const settingsStyle = computed(() => ({
   '--tab-active-bg': currentUiTheme.value.activeTab,
   '--tab-text': currentUiTheme.value.text,
   '--tab-active-text': currentUiTheme.value.activeText,
-  '--tab-border': currentUiTheme.value.border
+  '--tab-border': currentUiTheme.value.border,
+  '--tab-border-neutral': currentUiTheme.value.neutralBorder
 }));
 
 const router = useRouter();
@@ -603,13 +596,13 @@ onUnmounted(() => {
   }
 
   :deep(.settings-tabs .p-tabview-nav-content) {
-    border-bottom: 1px solid var(--tab-border);
+    border-bottom: 1px solid var(--tab-border-neutral);
   }
 
   :deep(.settings-tabs .p-tabview-nav) {
     display: flex;
     background: var(--tab-bg) !important;
-    border-bottom: 1px solid var(--tab-border) !important;
+    border-bottom: 1px solid var(--tab-border-neutral) !important;
   }
 
   :deep(.settings-tabs .p-tabview-nav-link) {

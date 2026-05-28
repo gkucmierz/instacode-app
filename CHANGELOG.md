@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.12] - 2026-05-28
+
+### Fixed
+- The full-width bright turquoise tab bar bottom border has been replaced with a subtle, theme-appropriate neutral border.
+- The thin loading progress bar under the title bar now only activates when the app is actually resolving and downloading packages/assets from external CDNs, rather than showing up on every code evaluation run.
+
+### Added
+- A build-time script `extract-themes.mjs` that dynamically extracts colors from CodeMirror packages (`@codemirror/theme-one-dark` and `@uiw/codemirror-themes-all`) to generate a static JSON color metadata file, avoiding runtime overhead and keeping the UI shell colors in sync with CodeMirror.
+- Npm lifecycle hooks `predev` and `prebuild` to automatically run the theme extraction script.
+
 ## [1.3.11] - 2026-05-28
 
 ### Added

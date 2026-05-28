@@ -166,6 +166,10 @@ addEventListener('message', async ({ data }) => {
     const deps = extractDependencies(code);
     
     if (deps.length > 0) {
+      const pm = self.nativePostMessage;
+      if (pm && typeof pm === 'function') {
+        pm({ type: 'loading', state: true });
+      }
       await Promise.all(deps.map(async (dep) => {
         const { name, version, loc, type: typeDep } = dep;
         if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {

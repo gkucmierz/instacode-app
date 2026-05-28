@@ -6,6 +6,7 @@ import CodeEditor from '../components/CodeEditor.vue';
 import GistExportModal from '../components/GistExportModal.vue';
 import settingsService from '../services/settingsService';
 import codeService from '../services/codeService';
+import themeMap from '../assets/themes-metadata.json';
 
 import Worker from '../file.worker.js?worker';
 
@@ -152,16 +153,7 @@ const activeTabState = computed(() => {
   return tab ? getTabState(tab.id) : null;
 });
 
-const themeMap = {
-  oneDark: { bg: '#282c34', tabBg: '#21252b', activeTab: '#282c34', text: '#abb2bf', activeText: '#ffffff', border: '#56b6c2' },
-  dracula: { bg: '#282a36', tabBg: '#1e1f29', activeTab: '#282a36', text: '#6272a4', activeText: '#f8f8f2', border: '#bd93f9' },
-  githubDark: { bg: '#0d1117', tabBg: '#010409', activeTab: '#0d1117', text: '#8b949e', activeText: '#c9d1d9', border: '#f78166' },
-  githubLight: { bg: '#ffffff', tabBg: '#f6f8fa', activeTab: '#ffffff', text: '#57606a', activeText: '#24292f', border: '#0969da' },
-  nord: { bg: '#2e3440', tabBg: '#242933', activeTab: '#2e3440', text: '#d8dee9', activeText: '#eceff4', border: '#88c0d0' },
-  monokai: { bg: '#272822', tabBg: '#1e1f1c', activeTab: '#272822', text: '#75715e', activeText: '#f8f8f2', border: '#a6e22e' },
-  material: { bg: '#263238', tabBg: '#1e272c', activeTab: '#263238', text: '#546e7a', activeText: '#eeffff', border: '#80cbc4' },
-  eclipse: { bg: '#ffffff', tabBg: '#f0f0f0', activeTab: '#ffffff', text: '#7f7f7f', activeText: '#000000', border: '#0000ff' }
-};
+
 
 // React to settingsService changes if they occur
 const currentTheme = computed(() => themeMap[settingsService.getItem('theme')] || themeMap.oneDark);
@@ -173,7 +165,8 @@ const mainStyle = computed(() => ({
   '--tab-active-bg': currentTheme.value.activeTab,
   '--tab-text': currentTheme.value.text,
   '--tab-active-text': currentTheme.value.activeText,
-  '--tab-border': currentTheme.value.border
+  '--tab-border': currentTheme.value.border,
+  '--tab-border-neutral': currentTheme.value.neutralBorder
 }));
 
 const statusText = computed(() => {
@@ -208,7 +201,7 @@ const run = ({ tabId, code }) => {
   
   const state = getTabState(tabId);
   state.result = '';
-  state.isLoading = true;
+  state.isLoading = false;
   state.workerStatus = 'loading';
   state.lastPongReceived = Date.now();
 
@@ -488,7 +481,7 @@ main {
   height: 100%;
 }
 .code-tabs .p-tabview-nav-content {
-  border-bottom: 1px solid var(--tab-border);
+  border-bottom: 1px solid var(--tab-border-neutral);
 }
 
 .code-tabs .p-tabview-ink-bar {
@@ -503,7 +496,7 @@ main {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
   background: var(--tab-bg) !important;
-  border-bottom: 1px solid var(--tab-border) !important;
+  border-bottom: 1px solid var(--tab-border-neutral) !important;
 }
 
 .code-tabs .p-tabview-nav::-webkit-scrollbar {

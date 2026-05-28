@@ -1,0 +1,74 @@
+{
+  "oneDark": {
+    "bg": "#282c34",
+    "tabBg": "#21252b",
+    "activeTab": "#282c34",
+    "text": "#abb2bf",
+    "activeText": "#ffffff",
+    "border": "#56b6c2",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "dracula": {
+    "bg": "#282a36",
+    "tabBg": "#1f212a",
+    "activeTab": "#282a36",
+    "text": "#6272a4",
+    "activeText": "#f8f8f2",
+    "border": "#bd93f9",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "githubDark": {
+    "bg": "#0d1117",
+    "tabBg": "#0a0d12",
+    "activeTab": "#0d1117",
+    "text": "#8b949e",
+    "activeText": "#c9d1d9",
+    "border": "#f78166",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "githubLight": {
+    "bg": "#fff",
+    "tabBg": "#f2f2f2",
+    "activeTab": "#fff",
+    "text": "#57606a",
+    "activeText": "#24292e",
+    "border": "#0969da",
+    "neutralBorder": "rgba(0, 0, 0, 0.1)"
+  },
+  "nord": {
+    "bg": "#2e3440",
+    "tabBg": "#242932",
+    "activeTab": "#2e3440",
+    "text": "#d8dee9",
+    "activeText": "#FFFFFF",
+    "border": "#88c0d0",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "monokai": {
+    "bg": "#272822",
+    "tabBg": "#1e1f1b",
+    "activeTab": "#272822",
+    "text": "#75715e",
+    "activeText": "#f8f8f2",
+    "border": "#a6e22e",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "material": {
+    "bg": "#2e3235",
+    "tabBg": "#242729",
+    "activeTab": "#2e3235",
+    "text": "#546e7a",
+    "activeText": "#bdbdbd",
+    "border": "#80cbc4",
+    "neutralBorder": "rgba(255, 255, 255, 0.1)"
+  },
+  "eclipse": {
+    "bg": "#fff",
+    "tabBg": "#f7f7f7",
+    "activeTab": "#fff",
+    "text": "#7f7f7f",
+    "activeText": "#000",
+    "border": "#0000ff",
+    "neutralBorder": "rgba(0, 0, 0, 0.1)"
+  }
+}
