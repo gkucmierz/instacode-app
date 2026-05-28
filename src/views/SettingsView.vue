@@ -67,6 +67,29 @@ const themesMap = {
   eclipse: allThemes.eclipse
 };
 
+const themeColorsMap = {
+  oneDark: { bg: '#282c34', tabBg: '#21252b', activeTab: '#282c34', text: '#abb2bf', activeText: '#ffffff', border: '#56b6c2' },
+  dracula: { bg: '#282a36', tabBg: '#1e1f29', activeTab: '#282a36', text: '#6272a4', activeText: '#f8f8f2', border: '#bd93f9' },
+  githubDark: { bg: '#0d1117', tabBg: '#010409', activeTab: '#0d1117', text: '#8b949e', activeText: '#c9d1d9', border: '#f78166' },
+  githubLight: { bg: '#ffffff', tabBg: '#f6f8fa', activeTab: '#ffffff', text: '#57606a', activeText: '#24292f', border: '#0969da' },
+  nord: { bg: '#2e3440', tabBg: '#242933', activeTab: '#2e3440', text: '#d8dee9', activeText: '#eceff4', border: '#88c0d0' },
+  monokai: { bg: '#272822', tabBg: '#1e1f1c', activeTab: '#272822', text: '#75715e', activeText: '#f8f8f2', border: '#a6e22e' },
+  material: { bg: '#263238', tabBg: '#1e272c', activeTab: '#263238', text: '#546e7a', activeText: '#eeffff', border: '#80cbc4' },
+  eclipse: { bg: '#ffffff', tabBg: '#f0f0f0', activeTab: '#ffffff', text: '#7f7f7f', activeText: '#000000', border: '#0000ff' }
+};
+
+const currentUiTheme = computed(() => themeColorsMap[so.theme] || themeColorsMap.oneDark);
+
+const settingsStyle = computed(() => ({
+  backgroundColor: currentUiTheme.value.bg,
+  color: currentUiTheme.value.activeText,
+  '--tab-bg': currentUiTheme.value.tabBg,
+  '--tab-active-bg': currentUiTheme.value.activeTab,
+  '--tab-text': currentUiTheme.value.text,
+  '--tab-active-text': currentUiTheme.value.activeText,
+  '--tab-border': currentUiTheme.value.border
+}));
+
 const router = useRouter();
 
 const so = reactive(
@@ -251,7 +274,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="settings">
+  <div class="settings" :style="settingsStyle">
     <TabView class="settings-tabs">
       <TabPanel header="General">
         <div class="general-tab-content">
@@ -430,6 +453,11 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     margin: 0;
+    color: var(--tab-active-text) !important;
+
+    label, span:not(.pi) {
+      color: var(--tab-active-text) !important;
+    }
 
     label {
       margin-left: 12px;
@@ -485,17 +513,18 @@ onUnmounted(() => {
 
       .total-size {
         font-size: 0.9rem;
-        color: #aaa;
+        color: var(--tab-text);
         
         strong {
-          color: #fff;
+          color: var(--tab-active-text);
         }
       }
     }
 
     .cache-loading, .cache-empty {
-      color: #888;
+      color: var(--tab-text);
       font-style: italic;
+      opacity: 0.8;
     }
 
     .cache-list {
@@ -509,7 +538,7 @@ onUnmounted(() => {
         align-items: center;
         padding: 0.5rem 0.5rem 0.25rem 0.5rem;
         margin-top: 1rem;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--tab-border);
         
         .pkg-info {
           display: flex;
@@ -519,11 +548,12 @@ onUnmounted(() => {
             font-family: monospace;
             font-weight: bold;
             font-size: 1.1rem;
-            color: #fff;
+            color: var(--tab-active-text);
           }
           .pkg-size {
             font-size: 0.8rem;
-            color: #888;
+            color: var(--tab-text);
+            opacity: 0.8;
           }
         }
       }
@@ -534,7 +564,7 @@ onUnmounted(() => {
         align-items: center;
         padding: 0.25rem 0.5rem;
         margin-bottom: 2px;
-        background-color: #1e1e1e;
+        background-color: var(--tab-bg);
         border-radius: 4px;
         margin-left: 1rem;
 
@@ -546,16 +576,59 @@ onUnmounted(() => {
 
           .pkg-version {
             font-family: monospace;
-            color: #d4d4d4;
+            color: var(--tab-active-text);
           }
 
           .pkg-size {
             font-size: 0.8rem;
-            color: #888;
+            color: var(--tab-text);
+            opacity: 0.8;
           }
         }
       }
     }
+  }
+
+  :deep(.settings-tabs.p-tabview) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :deep(.settings-tabs .p-tabview-panels) {
+    flex: 1;
+    padding: 24px;
+    overflow: auto;
+    background: transparent !important;
+  }
+
+  :deep(.settings-tabs .p-tabview-nav-content) {
+    border-bottom: 1px solid var(--tab-border);
+  }
+
+  :deep(.settings-tabs .p-tabview-nav) {
+    display: flex;
+    background: var(--tab-bg) !important;
+    border-bottom: 1px solid var(--tab-border) !important;
+  }
+
+  :deep(.settings-tabs .p-tabview-nav-link) {
+    background: var(--tab-bg) !important;
+    color: var(--tab-text) !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    transition: all 0.2s ease;
+  }
+
+  :deep(.settings-tabs .p-tabview-nav-link:hover) {
+    color: var(--tab-active-text) !important;
+  }
+
+  :deep(.settings-tabs .p-tabview-header.p-highlight .p-tabview-nav-link) {
+    background: var(--tab-active-bg) !important;
+    color: var(--tab-active-text) !important;
+    border-bottom: 2px solid var(--tab-border) !important;
   }
 }
 </style>

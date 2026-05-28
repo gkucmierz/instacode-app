@@ -438,12 +438,13 @@ main {
 }
 .p-splitter-gutter {
   outline-width: 0;
-  background: rgba(128, 128, 128, 0.05) !important;
-  transition: background-color 0.2s;
+  background: var(--tab-border) !important;
+  opacity: 0.15;
+  transition: opacity 0.2s;
 }
 .p-splitter-gutter:hover,
 .p-splitter-gutter:active {
-  background: rgba(128, 128, 128, 0.2) !important;
+  opacity: 0.4;
 }
 .p-splitter-gutter-handle:focus {
   box-shadow: none !important;
@@ -472,7 +473,7 @@ main {
   height: 100%;
 }
 .code-tabs .p-tabview-nav-content {
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  border-bottom: 1px solid var(--tab-border);
 }
 
 .code-tabs .p-tabview-ink-bar {
@@ -486,6 +487,8 @@ main {
   overflow-y: hidden !important;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  background: var(--tab-bg) !important;
+  border-bottom: 1px solid var(--tab-border) !important;
 }
 
 .code-tabs .p-tabview-nav::-webkit-scrollbar {

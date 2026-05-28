@@ -17,8 +17,8 @@ const themesMap = {
   eclipse: allThemes.eclipse
 };
 
-const currentTheme = themesMap[settingsService.getItem('theme')] || oneDark;
-const extensions = [currentTheme, EditorState.readOnly.of(true)];
+const currentTheme = computed(() => themesMap[settingsService.getItem('theme')] || oneDark);
+const extensions = computed(() => [currentTheme.value, EditorState.readOnly.of(true)]);
 
 const props = defineProps(['data', 'status']);
 const emit = defineEmits(['open-new-tab']);
