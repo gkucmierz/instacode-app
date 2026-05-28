@@ -135,3 +135,41 @@ select:focus,
 .p-tabview .p-tabview-nav-link .pi {
   font-size: 0.9em;
 }
+
+/* Global Scrollbar Auto-Hide Styling (Only visible when scrolling) */
+* {
+  /* Firefox support */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.is-scrolling {
+  /* Firefox support */
+  scrollbar-color: rgba(128, 128, 128, 0.4) transparent;
+}
+
+/* Chrome, Safari, Edge, and other WebKit/Blink browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.4);
+}
+
+.is-scrolling::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.6);
+}
+

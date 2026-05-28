@@ -17,6 +17,23 @@ if (PrimeVueRipple && NanoUIRipple) {
   PrimeVueRipple.mounted = NanoUIRipple.mounted;
 }
 
+// Global scroll listener to dynamically show scrollbars only when actively scrolling
+if (typeof window !== 'undefined') {
+  window.addEventListener('scroll', (e) => {
+    const el = e.target;
+    if (el && el.classList && typeof el.classList.add === 'function') {
+      el.classList.add('is-scrolling');
+      if (el._scrollTimeout) {
+        clearTimeout(el._scrollTimeout);
+      }
+      el._scrollTimeout = setTimeout(() => {
+        el.classList.remove('is-scrolling');
+        delete el._scrollTimeout;
+      }, 1000);
+    }
+  }, { capture: true, passive: true });
+}
+
 const app = createApp(App);
 
 app.use(router);
