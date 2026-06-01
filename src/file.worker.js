@@ -154,10 +154,33 @@ self.clearInterval = (id) => {
   origClearInterval(id);
 };
 
+let canvasResolver = null;
+const canvasPromise = new Promise((resolve) => {
+  canvasResolver = resolve;
+});
+let displaySize = { width: 300, height: 150 };
+const resizeCallbacks = [];
+
 addEventListener('message', async ({ data }) => {
   if (data && data.type === 'ping') {
     const pm = self.nativePostMessage;
     if (pm && typeof pm === 'function') pm({ type: 'pong', state: activeTimers.size > 0 ? 'alive_async' : 'idle' });
+    return;
+  }
+
+  if (data && data.type === 'resolve-canvas') {
+    if (canvasResolver) {
+      canvasResolver(data.canvas);
+    }
+    return;
+  }
+
+  if (data && data.type === 'canvas-resize') {
+    displaySize.width = data.width;
+    displaySize.height = data.height;
+    for (const cb of resizeCallbacks) {
+      try { cb(data.width, data.height); } catch (e) {}
+    }
     return;
   }
   
@@ -172,6 +195,27 @@ addEventListener('message', async ({ data }) => {
       }
       await Promise.all(deps.map(async (dep) => {
         const { name, version, loc, type: typeDep } = dep;
+        if (name === 'canvas') {
+          const pm = self.nativePostMessage;
+          if (pm && typeof pm === 'function') {
+            pm({ type: 'request-canvas' });
+          }
+          const offscreenCanvas = await canvasPromise;
+          moduleRegistry['canvas'] = {
+            canvas: offscreenCanvas,
+            default: offscreenCanvas,
+            getContext: (type) => offscreenCanvas.getContext(type),
+            getDisplaySize: () => ({ ...displaySize }),
+            onResize: (cb) => {
+              if (typeof cb === 'function') {
+                resizeCallbacks.push(cb);
+                try { cb(displaySize.width, displaySize.height); } catch (e) {}
+              }
+            }
+          };
+          dep.uniqueName = 'canvas';
+          return;
+        }
         if (name.startsWith('data:') || name.startsWith('http://') || name.startsWith('https://')) {
           if (!moduleRegistry[name]) {
             try {

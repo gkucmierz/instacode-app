@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-06-02
+
+### Added
+- Integrated responsive HTML5 Canvas support using `OffscreenCanvas` transfer capabilities.
+- Magic built-in module `'canvas'` that exposes a native `canvas` object (offscreen) and helper functions (`onResize`, `getDisplaySize`).
+- Conditional vertical splitter layout in the output pane: shows the canvas viewport on top and the console output on bottom ONLY when the code imports `'canvas'`.
+- Built-in `ResizeObserver` on the canvas container that feeds container dimensional changes back to the Web Worker for real-time redrawing and responsive alignment.
+
 ## [1.3.12] - 2026-05-28
 
 ### Fixed

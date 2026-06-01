@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
 
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
@@ -137,7 +137,10 @@ const initTabStates = () => {
         isLoading: false,
         workerStatus: 'idle',
         lastPongReceived: Date.now(),
-        pingInterval: null
+        pingInterval: null,
+        canvasVisible: false,
+        canvasKey: 0,
+        resizeObserver: null
       };
     }
   });
@@ -191,6 +194,10 @@ const terminate = (tabId) => {
     state.pingInterval(); // Call the cancel function returned by setSafeInterval
     state.pingInterval = null;
   }
+  if (state.resizeObserver) {
+    state.resizeObserver.disconnect();
+    state.resizeObserver = null;
+  }
   state.isLoading = false;
   state.workerStatus = 'idle';
 };
@@ -204,11 +211,48 @@ const run = ({ tabId, code }) => {
   state.isLoading = false;
   state.workerStatus = 'loading';
   state.lastPongReceived = Date.now();
+  state.canvasVisible = false;
 
   state.worker = new Worker(new URL('../file.worker.js', import.meta.url), { type: 'module' });
 
   state.worker.onmessage = ({ data }) => {
     if (typeof data === 'object') {
+      if (data.type === 'request-canvas') {
+        state.canvasVisible = true;
+        state.canvasKey++;
+        nextTick(() => {
+          const canvasEl = document.getElementById(`canvas-${tabId}`);
+          if (canvasEl) {
+            try {
+              const offscreen = canvasEl.transferControlToOffscreen();
+              state.worker.postMessage({ type: 'resolve-canvas', canvas: offscreen }, [offscreen]);
+              
+              if (state.resizeObserver) {
+                state.resizeObserver.disconnect();
+              }
+              const wrapperEl = canvasEl.parentElement;
+              if (wrapperEl) {
+                state.resizeObserver = new ResizeObserver((entries) => {
+                  for (const entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    if (state.worker) {
+                      state.worker.postMessage({
+                        type: 'canvas-resize',
+                        width,
+                        height
+                      });
+                    }
+                  }
+                });
+                state.resizeObserver.observe(wrapperEl);
+              }
+            } catch (err) {
+              console.error('Failed to transfer control to offscreen canvas', err);
+            }
+          }
+        });
+        return;
+      }
       if (data.type === 'pong') {
         state.lastPongReceived = Date.now();
         if (data.state && state.workerStatus !== data.state) {
@@ -303,11 +347,29 @@ onUnmounted(() => {
               <CodeEditor :tabId="tab.id"/>
             </SplitterPanel>
             <SplitterPanel class="right-pane">
-              <ResultCode 
-                :data="getTabState(tab.id).result" 
-                :status="getTabState(tab.id).workerStatus"
-                @open-new-tab="handleOpenJsonTab"
-              />
+              <template v-if="getTabState(tab.id).canvasVisible">
+                <Splitter layout="vertical" style="height: 100%" :gutterSize="8" stateKey="instacode-canvas-splitter" stateStorage="local">
+                  <SplitterPanel :size="50" class="canvas-panel">
+                    <div class="canvas-wrapper">
+                      <canvas :id="`canvas-${tab.id}`" :key="getTabState(tab.id).canvasKey" class="instacode-canvas"></canvas>
+                    </div>
+                  </SplitterPanel>
+                  <SplitterPanel :size="50" style="overflow: auto">
+                    <ResultCode 
+                      :data="getTabState(tab.id).result" 
+                      :status="getTabState(tab.id).workerStatus"
+                      @open-new-tab="handleOpenJsonTab"
+                    />
+                  </SplitterPanel>
+                </Splitter>
+              </template>
+              <template v-else>
+                <ResultCode 
+                  :data="getTabState(tab.id).result" 
+                  :status="getTabState(tab.id).workerStatus"
+                  @open-new-tab="handleOpenJsonTab"
+                />
+              </template>
             </SplitterPanel>
           </Splitter>
         </div>
@@ -437,6 +499,33 @@ main {
 
 .editor-container {
   height: 100%;
+}
+
+.canvas-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e1e1e;
+  overflow: hidden;
+  padding: 16px;
+  position: relative;
+}
+
+.canvas-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.instacode-canvas {
+  background: #ffffff;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  object-fit: contain;
 }
 </style>
 <style>
