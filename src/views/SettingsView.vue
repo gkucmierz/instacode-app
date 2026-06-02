@@ -13,39 +13,10 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import * as allThemes from '@uiw/codemirror-themes-all';
 
-import settingsService from '../services/settingsService';
+import settingsService, { DEFAULT_SETTINGS } from '../services/settingsService';
 import { getAllCachedPackages, removePackageFromCache, clearCache } from '../services/PackageManager';
 import themeColorsMap from '../assets/themes-metadata.json';
 
-const DEFAULT_SETTINGS = {
-  autoScroll: false,
-  autoPrint: true,
-  treeShake: true,
-  workerWindowPolyfill: true,
-  theme: 'oneDark',
-  uiDensity: 'compact',
-  cdns: [
-    {
-      url: 'https://cdn.jsdelivr.net/npm/',
-      format: '{baseUrl}{id}/+esm',
-      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
-      replaceWith: "$1https://cdn.jsdelivr.net/$2"
-    },
-    {
-      url: 'https://esm.sh/',
-      format: '{baseUrl}{id}?bundle{exports}',
-      replacePattern: "(import\\s+.*?from\\s*['\"]|import\\s*\\(['\"]|export\\s+.*?from\\s*['\"])\\/(?!\\/)([^'\"]+['\"])",
-      replaceWith: "$1https://esm.sh/$2"
-    },
-    {
-      url: 'https://unpkg.com/',
-      format: '{baseUrl}{id}?module',
-      replacePattern: null,
-      replaceWith: null
-    }
-  ],
-  githubToken: ''
-};
 
 const THEMES = [
   { label: 'One Dark (Default)', value: 'oneDark' },

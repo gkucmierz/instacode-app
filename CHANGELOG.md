@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-06-02
+
+### Added
+- Added support for pointer and click events forwarding from main thread to Web Worker (PointerDown, PointerMove, PointerUp, Click).
+- Exposed event registration hooks in the `'canvas'` module: `onPointerDown`, `onPointerMove`, `onPointerUp`, `onClick`.
+- Documented interaction events in `docs/canvas-events.md`.
+
+### Fixed
+- Fixed a regression in version 1.5.0 where `workerWindowPolyfill` defaults were not synchronized between `settingsService.mjs` and `SettingsView.vue`, resulting in the window polyfill being disabled on new visits and breaking Three.js/glassy demo payloads.
+- Added comprehensive E2E tests verifying the `workerWindowPolyfill` behavior.
+
+## [1.5.0] - 2026-06-02
+
+### Added
+- Added an option in settings to conditionally enable/disable virtual `window` and `devicePixelRatio` polyfill inside Web Workers.
+- Documented the virtual window polyfill in `docs/window-polyfill.md`.
+- Added help icon button in settings linking to the Gitea repository documentation.
+
+### Fixed
+- Optimized Web Worker lifecycle when switching editor tabs.
+- Resolved memory leaks and background worker active timer bloat.
+- Replaced empty catch blocks in worker error handling to pass lint checks.
+- Prevented double overlay scroll on SettingsView by closing theme dropdown overlay on view unmount.
+
 ## [1.4.0] - 2026-06-02
 
 ### Added

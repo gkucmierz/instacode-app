@@ -306,6 +306,43 @@ const run = ({ tabId, code }) => {
   }, 200);
 };
 
+const handleCanvasPointer = (tabId, pointerType, event) => {
+  const state = getTabState(tabId);
+  if (!state.worker) return;
+
+  const rect = event.target.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  state.worker.postMessage({
+    type: 'canvas-pointer',
+    pointerType,
+    x,
+    y,
+    button: event.button,
+    buttons: event.buttons,
+    pointerId: event.pointerId,
+    width: rect.width,
+    height: rect.height
+  });
+};
+
+const handleCanvasClick = (tabId, event) => {
+  const state = getTabState(tabId);
+  if (!state.worker) return;
+
+  const rect = event.target.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  state.worker.postMessage({
+    type: 'canvas-click',
+    x,
+    y,
+    button: event.button
+  });
+};
+
 watch(activeTabIndex, (newIdx, oldIdx) => {
   // Terminate the previously active tab worker to save resources
   if (oldIdx !== undefined && oldIdx !== null) {
@@ -373,7 +410,15 @@ onUnmounted(() => {
                 <Splitter layout="vertical" style="height: 100%" :gutterSize="8" stateKey="instacode-canvas-splitter" stateStorage="local">
                   <SplitterPanel :size="50" class="canvas-panel">
                     <div class="canvas-wrapper">
-                      <canvas :id="`canvas-${tab.id}`" :key="getTabState(tab.id).canvasKey" class="instacode-canvas"></canvas>
+                      <canvas
+                        :id="`canvas-${tab.id}`"
+                        :key="getTabState(tab.id).canvasKey"
+                        class="instacode-canvas"
+                        @pointerdown="handleCanvasPointer(tab.id, 'down', $event)"
+                        @pointermove="handleCanvasPointer(tab.id, 'move', $event)"
+                        @pointerup="handleCanvasPointer(tab.id, 'up', $event)"
+                        @click="handleCanvasClick(tab.id, $event)"
+                      ></canvas>
                     </div>
                   </SplitterPanel>
                   <SplitterPanel :size="50" style="overflow: auto">

@@ -160,6 +160,10 @@ const canvasPromise = new Promise((resolve) => {
 });
 let displaySize = { width: 300, height: 150 };
 const resizeCallbacks = [];
+const pointerDownCallbacks = [];
+const pointerMoveCallbacks = [];
+const pointerUpCallbacks = [];
+const clickCallbacks = [];
 
 addEventListener('message', async ({ data }) => {
   if (data && data.type === 'ping') {
@@ -181,6 +185,48 @@ addEventListener('message', async ({ data }) => {
     for (const cb of resizeCallbacks) {
       try {
         cb(data.width, data.height);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return;
+  }
+
+  if (data && data.type === 'canvas-pointer') {
+    const callbacks = {
+      'down': pointerDownCallbacks,
+      'move': pointerMoveCallbacks,
+      'up': pointerUpCallbacks
+    }[data.pointerType];
+    
+    if (callbacks) {
+      for (const cb of callbacks) {
+        try {
+          cb({
+            x: data.x,
+            y: data.y,
+            button: data.button,
+            buttons: data.buttons,
+            pointerId: data.pointerId,
+            canvasWidth: data.width,
+            canvasHeight: data.height
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+    return;
+  }
+
+  if (data && data.type === 'canvas-click') {
+    for (const cb of clickCallbacks) {
+      try {
+        cb({
+          x: data.x,
+          y: data.y,
+          button: data.button
+        });
       } catch (err) {
         console.error(err);
       }
@@ -229,6 +275,18 @@ addEventListener('message', async ({ data }) => {
                   console.error(err);
                 }
               }
+            },
+            onPointerDown: (cb) => {
+              if (typeof cb === 'function') pointerDownCallbacks.push(cb);
+            },
+            onPointerMove: (cb) => {
+              if (typeof cb === 'function') pointerMoveCallbacks.push(cb);
+            },
+            onPointerUp: (cb) => {
+              if (typeof cb === 'function') pointerUpCallbacks.push(cb);
+            },
+            onClick: (cb) => {
+              if (typeof cb === 'function') clickCallbacks.push(cb);
             }
           };
           dep.uniqueName = 'canvas';

@@ -3,10 +3,13 @@ import { STORAGE_KEY_SETTINGS } from '../app.config';
 
 const data = reactive({});
 
-const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS = {
   uiDensity: 'compact',
   autoScroll: false,
   autoPrint: true,
+  treeShake: true,
+  workerWindowPolyfill: true,
+  theme: 'oneDark',
   cdns: [
     {
       url: 'https://cdn.jsdelivr.net/npm/',
