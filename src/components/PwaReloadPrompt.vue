@@ -29,6 +29,11 @@ watch(needRefresh, async (isNeeded) => {
 const close = () => {
   needRefresh.value = false;
 };
+
+const handleRefresh = async () => {
+  await updateServiceWorker();
+  window.location.reload();
+};
 </script>
 
 <template>
@@ -51,7 +56,7 @@ const close = () => {
     
     <template #footer>
       <PrimeButton label="Later" icon="pi pi-times" @click="close" class="p-button-text p-button-secondary" />
-      <PrimeButton label="Refresh now" icon="pi pi-refresh" @click="updateServiceWorker()" autofocus />
+      <PrimeButton label="Refresh now" icon="pi pi-refresh" @click="handleRefresh()" autofocus />
     </template>
   </Dialog>
 </template>
