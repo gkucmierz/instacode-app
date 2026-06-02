@@ -94,10 +94,17 @@ const customRequire = (pkgName) => {
   
   throw new Error(`Module ${pkgName} not found or failed to load.`);
 };
+const activeTimers = new Set();
+const activeAnimationFrames = new Set();
+const activeIdleCallbacks = new Set();
+
 const sendState = () => {
   const pm = self.nativePostMessage;
   if (pm && typeof pm === 'function') {
-    pm({ type: 'worker-state', state: activeTimers.size > 0 ? 'alive_async' : 'idle' });
+    const isAlive = activeTimers.size > 0 ||
+                    activeAnimationFrames.size > 0 ||
+                    activeIdleCallbacks.size > 0;
+    pm({ type: 'worker-state', state: isAlive ? 'alive_async' : 'idle' });
   }
 };
 
@@ -105,7 +112,10 @@ const origSetTimeout = self.setTimeout;
 const origClearTimeout = self.clearTimeout;
 const origSetInterval = self.setInterval;
 const origClearInterval = self.clearInterval;
-const activeTimers = new Set();
+const origRequestAnimationFrame = self.requestAnimationFrame;
+const origCancelAnimationFrame = self.cancelAnimationFrame;
+const origRequestIdleCallback = self.requestIdleCallback;
+const origCancelIdleCallback = self.cancelIdleCallback;
 
 self.setTimeout = (cb, ms, ...args) => {
   const stack = new Error().stack || '';
@@ -114,9 +124,11 @@ self.setTimeout = (cb, ms, ...args) => {
   const id = origSetTimeout((...a) => {
     if (!isSystemTimer) {
       activeTimers.delete(id);
-      sendState();
     }
     cb(...a);
+    if (!isSystemTimer) {
+      sendState();
+    }
   }, ms, ...args);
   
   if (!isSystemTimer) {
@@ -153,6 +165,52 @@ self.clearInterval = (id) => {
   }
   origClearInterval(id);
 };
+
+if (typeof origRequestAnimationFrame === 'function') {
+  self.requestAnimationFrame = (cb) => {
+    const id = origRequestAnimationFrame((time) => {
+      activeAnimationFrames.delete(id);
+      cb(time);
+      sendState();
+    });
+    activeAnimationFrames.add(id);
+    sendState();
+    return id;
+  };
+}
+
+if (typeof origCancelAnimationFrame === 'function') {
+  self.cancelAnimationFrame = (id) => {
+    if (activeAnimationFrames.has(id)) {
+      activeAnimationFrames.delete(id);
+      sendState();
+    }
+    origCancelAnimationFrame(id);
+  };
+}
+
+if (typeof origRequestIdleCallback === 'function') {
+  self.requestIdleCallback = (cb, options) => {
+    const id = origRequestIdleCallback((deadline) => {
+      activeIdleCallbacks.delete(id);
+      cb(deadline);
+      sendState();
+    }, options);
+    activeIdleCallbacks.add(id);
+    sendState();
+    return id;
+  };
+}
+
+if (typeof origCancelIdleCallback === 'function') {
+  self.cancelIdleCallback = (id) => {
+    if (activeIdleCallbacks.has(id)) {
+      activeIdleCallbacks.delete(id);
+      sendState();
+    }
+    origCancelIdleCallback(id);
+  };
+}
 
 let canvasResolver = null;
 const canvasPromise = new Promise((resolve) => {

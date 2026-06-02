@@ -108,8 +108,24 @@ animate();
 
 ---
 
+## Thread Activity Status Indicator
+
+Instacode features a real-time status indicator in the bottom-right corner representing the execution state of the Web Worker:
+
+- **Idle (Green)**: The Web Worker is idle, waiting for input. No active tasks or animation loops are scheduled in the background.
+- **Background thread (async) (Blue)**: The Web Worker is actively running code asynchronously. This is triggered by:
+  - Background asynchronous timers (`setTimeout`, `setInterval`).
+  - Active animation frames (`requestAnimationFrame`, `cancelAnimationFrame`).
+  - Scheduled idle callbacks (`requestIdleCallback`, `cancelIdleCallback`).
+- **Evaluating (Blue with pulse)**: The Web Worker is currently compiling and executing the code block.
+- **Blocked (Red)**: The CPU is 100% busy in a synchronous blocking loop, preventing incoming event processing.
+
+Because of this, any continuous animation loop (such as Three.js `requestAnimationFrame`) will correctly keep the status as **Background thread (async)** (Blue), indicating that the graphics thread is running and rendering in the background.
+
+---
+
 ## Live Examples & Gists
 
 You can load pre-configured interactive scripts directly inside Instacode using the Gist integration.
 
-*   [Interactive Dichroic X-Cube](https://gist.github.com/placeholder-dichroic-cube-gist) (Placeholder - grzes1 gist link to be updated here)
+*   [Interactive Dichroic X-Cube](https://gist.github.com/gkucmierz/843e36d822e2fc3f14721e835e60ab8b)
