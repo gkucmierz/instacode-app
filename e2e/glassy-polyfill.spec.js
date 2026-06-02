@@ -16,8 +16,8 @@ test.describe('Instacode Glassy Polyfill E2E Tests', () => {
 
     // 3. Wait for execution and verify window is polyfilled (default is true)
     const resultPane = page.locator('.result-code');
-    await expect(resultPane).toContainText('WINDOW_TYPE: "object"', { timeout: 10000 });
-    await expect(resultPane).toContainText('WINDOW_DPR: 1', { timeout: 10000 });
+    await expect(resultPane).toContainText("'WINDOW_TYPE:', 'object'", { timeout: 10000 });
+    await expect(resultPane).toContainText("'WINDOW_DPR:', 1", { timeout: 10000 });
 
     // 4. Navigate to Settings page
     await page.goto('/settings');
