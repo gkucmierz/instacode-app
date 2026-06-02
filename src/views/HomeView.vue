@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue';
 
 import ResultCode from '../components/ResultCode.vue';
 import CodeEditor from '../components/CodeEditor.vue';
@@ -306,6 +306,27 @@ const run = ({ tabId, code }) => {
   }, 200);
 };
 
+watch(activeTabIndex, (newIdx, oldIdx) => {
+  // Terminate the previously active tab worker to save resources
+  if (oldIdx !== undefined && oldIdx !== null) {
+    const oldTab = tabs.value[oldIdx];
+    if (oldTab) {
+      terminate(oldTab.id);
+    }
+  }
+
+  // Run the newly active tab worker if it's not already running
+  const newTab = tabs.value[newIdx];
+  if (newTab) {
+    const state = getTabState(newTab.id);
+    if (!state.worker) {
+      nextTick(() => {
+        run({ tabId: newTab.id, code: newTab.code });
+      });
+    }
+  }
+}, { immediate: false });
+
 onMounted(() => {
   codeService.ee.on('change', run);
   codeService.ee.on('tabs-changed', () => {
@@ -314,10 +335,11 @@ onMounted(() => {
   });
   window.addEventListener('keydown', handleKeydown, { capture: true });
   
-  // Initialize all existing tabs
-  tabs.value.forEach(tab => {
-    run({ tabId: tab.id, code: tab.code });
-  });
+  // Run only the active tab on mount
+  const activeTab = tabs.value[activeTabIndex.value];
+  if (activeTab) {
+    run({ tabId: activeTab.id, code: activeTab.code });
+  }
 });
 
 onUnmounted(() => {
