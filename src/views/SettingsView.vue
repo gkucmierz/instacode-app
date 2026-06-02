@@ -101,6 +101,7 @@ const escDown = e => {
   }
 };
 
+const themeDropdownRef = ref(null);
 const cachedPackages = ref([]);
 const isCacheLoading = ref(false);
 
@@ -263,6 +264,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', escDown);
+  if (themeDropdownRef.value) {
+    if (typeof themeDropdownRef.value.hide === 'function') {
+      themeDropdownRef.value.hide();
+    } else {
+      themeDropdownRef.value.overlayVisible = false;
+    }
+  }
 });
 </script>
 
@@ -290,6 +298,7 @@ onUnmounted(() => {
             <p class="item">
               <label for="themeSelect" style="margin-left: 0; margin-right: 12px; width: 150px">Editor Theme</label>
               <Dropdown 
+                ref="themeDropdownRef"
                 id="themeSelect" 
                 v-model="so.theme" 
                 :options="THEMES" 
