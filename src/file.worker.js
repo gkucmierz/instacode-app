@@ -179,12 +179,26 @@ addEventListener('message', async ({ data }) => {
     displaySize.width = data.width;
     displaySize.height = data.height;
     for (const cb of resizeCallbacks) {
-      try { cb(data.width, data.height); } catch (e) {}
+      try {
+        cb(data.width, data.height);
+      } catch (err) {
+        console.error(err);
+      }
     }
     return;
   }
   
   const { code, settings } = data;
+
+  if (settings && settings.workerWindowPolyfill) {
+    if (typeof self !== 'undefined' && !self.window) {
+      self.window = self;
+    }
+    if (typeof self !== 'undefined' && !self.devicePixelRatio) {
+      self.devicePixelRatio = 1;
+    }
+  }
+
   try {
     const deps = extractDependencies(code);
     
@@ -209,7 +223,11 @@ addEventListener('message', async ({ data }) => {
             onResize: (cb) => {
               if (typeof cb === 'function') {
                 resizeCallbacks.push(cb);
-                try { cb(displaySize.width, displaySize.height); } catch (e) {}
+                try {
+                  cb(displaySize.width, displaySize.height);
+                } catch (err) {
+                  console.error(err);
+                }
               }
             }
           };

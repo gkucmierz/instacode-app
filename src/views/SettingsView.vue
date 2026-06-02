@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
   autoScroll: false,
   autoPrint: true,
   treeShake: true,
+  workerWindowPolyfill: true,
   theme: 'oneDark',
   uiDensity: 'compact',
   cdns: [
@@ -186,6 +187,7 @@ const KEY_ORDER = [
   'autoScroll',
   'autoPrint',
   'treeShake',
+  'workerWindowPolyfill',
   'theme',
   'uiDensity',
   'githubToken',
@@ -293,6 +295,21 @@ onUnmounted(() => {
             <p class="item">
               <label for="treeShake" style="margin-left: 0; margin-right: 12px; width: 150px">Tree Shaking (Bundle)</label>
               <InputSwitch v-model="so.treeShake" inputId="treeShake" />
+            </p>
+
+            <p class="item">
+              <label for="workerWindowPolyfill" style="margin-left: 0; margin-right: 12px; width: 150px; display: flex; align-items: center; justify-content: space-between;">
+                Window Polyfill (Worker)
+                <a 
+                  href="https://gitea.7u.pl/gkucmierz/instacode-app/src/branch/main/docs/window-polyfill.md#what-is-it" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style="display: inline-flex; align-items: center;"
+                >
+                  <i class="pi pi-question-circle" style="font-size: 0.85em;"></i>
+                </a>
+              </label>
+              <InputSwitch v-model="so.workerWindowPolyfill" inputId="workerWindowPolyfill" />
             </p>
 
             <p class="item">
@@ -463,6 +480,18 @@ onUnmounted(() => {
 
     label {
       margin-left: 12px;
+
+      a {
+        color: var(--tab-text) !important;
+        opacity: 0.6;
+        transition: opacity 0.2s, color 0.2s;
+        text-decoration: none;
+
+        &:hover {
+          opacity: 1;
+          color: var(--tab-active-text) !important;
+        }
+      }
     }
   }
 
