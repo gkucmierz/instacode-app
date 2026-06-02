@@ -1,28 +1,3 @@
-<template>
-  <Dialog v-model:visible="needRefresh" modal header="Aktualizacja Instacode" :closable="false" :style="{ width: '400px' }">
-    <div class="pwa-prompt-content">
-      <i class="pi pi-cloud-download update-icon"></i>
-      <p>Dostępna jest nowa wersja środowiska!</p>
-      
-      <div class="version-info">
-        <div class="version-row">
-          <span>Obecna wersja:</span>
-          <strong>v{{ currentVersion }}</strong>
-        </div>
-        <div class="version-row" v-if="newVersion">
-          <span>Najnowsza wersja:</span>
-          <strong class="highlight">v{{ newVersion }}</strong>
-        </div>
-      </div>
-    </div>
-    
-    <template #footer>
-      <PrimeButton label="Później" icon="pi pi-times" @click="close" class="p-button-text p-button-secondary" />
-      <PrimeButton label="Odśwież teraz" icon="pi pi-refresh" @click="updateServiceWorker()" autofocus />
-    </template>
-  </Dialog>
-</template>
-
 <script setup>
 import { ref, watch } from 'vue';
 import { useRegisterSW } from 'virtual:pwa-register/vue';
@@ -55,6 +30,31 @@ const close = () => {
   needRefresh.value = false;
 };
 </script>
+
+<template>
+  <Dialog v-model:visible="needRefresh" modal header="Instacode Update" :closable="false" :style="{ width: '400px' }">
+    <div class="pwa-prompt-content">
+      <i class="pi pi-cloud-download update-icon"></i>
+      <p>A new version is available!</p>
+      
+      <div class="version-info">
+        <div class="version-row">
+          <span>Current version:</span>
+          <strong>v{{ currentVersion }}</strong>
+        </div>
+        <div class="version-row" v-if="newVersion">
+          <span>Latest version:</span>
+          <strong class="highlight">v{{ newVersion }}</strong>
+        </div>
+      </div>
+    </div>
+    
+    <template #footer>
+      <PrimeButton label="Later" icon="pi pi-times" @click="close" class="p-button-text p-button-secondary" />
+      <PrimeButton label="Refresh now" icon="pi pi-refresh" @click="updateServiceWorker()" autofocus />
+    </template>
+  </Dialog>
+</template>
 
 <style scoped>
 .pwa-prompt-content {
