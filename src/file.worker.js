@@ -228,8 +228,12 @@ if (typeof origCancelIdleCallback === 'function') {
 }
 
 let canvasResolver = null;
+let resolvedCanvas = null;
 const canvasPromise = new Promise((resolve) => {
-  canvasResolver = resolve;
+  canvasResolver = (canvas) => {
+    resolvedCanvas = canvas;
+    resolve(canvas);
+  };
 });
 let displaySize = { width: 300, height: 150 };
 const resizeCallbacks = [];
@@ -255,6 +259,10 @@ addEventListener('message', async ({ data }) => {
   if (data && data.type === 'canvas-resize') {
     displaySize.width = data.width;
     displaySize.height = data.height;
+    if (resolvedCanvas) {
+      resolvedCanvas.width = data.width;
+      resolvedCanvas.height = data.height;
+    }
     for (const cb of resizeCallbacks) {
       try {
         cb(data.width, data.height);
@@ -334,6 +342,8 @@ addEventListener('message', async ({ data }) => {
             pm({ type: 'request-canvas' });
           }
           const offscreenCanvas = await canvasPromise;
+          offscreenCanvas.width = displaySize.width;
+          offscreenCanvas.height = displaySize.height;
           moduleRegistry['canvas'] = {
             canvas: offscreenCanvas,
             default: offscreenCanvas,
