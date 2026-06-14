@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.2] - 2026-06-14
+
+### Fixed
+- Fixed a bug where OffscreenCanvas dimensions (width and height) were not updated in the Web Worker on resolve-canvas and canvas-resize events, causing the canvas backing store to remain locked at 300x150.
+
 ## [1.5.1] - 2026-06-02
 
 ### Added
