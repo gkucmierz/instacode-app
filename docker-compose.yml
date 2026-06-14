@@ -1,3 +1,5 @@
+name: instacode-app
+ 
 services:
   instacode-app:
     build:

@@ -98,15 +98,14 @@ const activeTimers = new Set();
 const activeAnimationFrames = new Set();
 const activeIdleCallbacks = new Set();
 
-const sendState = () => {
-  const pm = self.nativePostMessage;
-  if (pm && typeof pm === 'function') {
-    const isAlive = activeTimers.size > 0 ||
-                    activeAnimationFrames.size > 0 ||
-                    activeIdleCallbacks.size > 0;
-    pm({ type: 'worker-state', state: isAlive ? 'alive_async' : 'idle' });
-  }
+const isWorkerAlive = () => {
+  return activeTimers.size > 0 ||
+         activeAnimationFrames.size > 0 ||
+         activeIdleCallbacks.size > 0;
 };
+
+let lastSentState = 'idle';
+let stateTimeoutId = null;
 
 const origSetTimeout = self.setTimeout;
 const origClearTimeout = self.clearTimeout;
@@ -116,6 +115,22 @@ const origRequestAnimationFrame = self.requestAnimationFrame;
 const origCancelAnimationFrame = self.cancelAnimationFrame;
 const origRequestIdleCallback = self.requestIdleCallback;
 const origCancelIdleCallback = self.cancelIdleCallback;
+
+const sendState = () => {
+  if (stateTimeoutId) {
+    origClearTimeout(stateTimeoutId);
+  }
+  stateTimeoutId = origSetTimeout(() => {
+    const pm = self.nativePostMessage;
+    if (pm && typeof pm === 'function') {
+      const newState = isWorkerAlive() ? 'alive_async' : 'idle';
+      if (newState !== lastSentState) {
+        lastSentState = newState;
+        pm({ type: 'worker-state', state: newState });
+      }
+    }
+  }, 10); // 10ms debounce to prevent rapid flickering
+};
 
 self.setTimeout = (cb, ms, ...args) => {
   const stack = new Error().stack || '';
@@ -226,7 +241,7 @@ const clickCallbacks = [];
 addEventListener('message', async ({ data }) => {
   if (data && data.type === 'ping') {
     const pm = self.nativePostMessage;
-    if (pm && typeof pm === 'function') pm({ type: 'pong', state: activeTimers.size > 0 ? 'alive_async' : 'idle' });
+    if (pm && typeof pm === 'function') pm({ type: 'pong', state: lastSentState });
     return;
   }
 
