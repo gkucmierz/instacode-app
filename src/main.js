@@ -1,6 +1,10 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import { tracker } from '@gkucmierz/analytics';
+
+// Initialize tracking
+tracker.init('instacode', 'https://analytics.7u.pl');
 
 import './assets/main.scss';
 
