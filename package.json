@@ -2,7 +2,7 @@
   "name": "Instacode",
   "description": "Scratchpad for instant JavaScript code running",
   "version": "1.5.2",
-  "author": "Grzegorz Ku\u0107mierz",
+  "author": "Grzegorz Kućmierz",
   "homepage": "https://github.com/gkucmierz/instacode-app",
   "scripts": {
     "predev": "node extract-themes.mjs",
