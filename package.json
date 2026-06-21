@@ -2,7 +2,7 @@
   "name": "Instacode",
   "description": "Scratchpad for instant JavaScript code running",
   "version": "1.5.2",
-  "author": "Grzegorz Kućmierz",
+  "author": "Grzegorz Ku\u0107mierz",
   "homepage": "https://github.com/gkucmierz/instacode-app",
   "scripts": {
     "predev": "node extract-themes.mjs",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.1.6",
     "@codemirror/theme-one-dark": "^6.1.0",
-    "@gkucmierz/analytics": "file:../analytics-app/sdk",
+    "@gkucmierz/analytics": "^1.0.1",
     "@gkucmierz/utils": "^2.1.0",
     "@uiw/codemirror-themes-all": "^4.25.9",
     "codemirror": "^6.0.1",
